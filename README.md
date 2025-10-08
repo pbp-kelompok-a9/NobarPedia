@@ -71,5 +71,6 @@ Modul ini menyediakan fitur **CRUD** untuk ulasan (*review*) terhadap tempat nob
 Dataset awal pada aplikasi ini bersumber dari **Google Maps API**.
 Dataset tersebut dapat dilihat [disini]().
 
-
+## Design
+Design web dapat dilihat [disini](https://www.figma.com/design/Rrkw3y34LQvzZG2eX4y9qv/NobarPedia?node-id=1-4&t=pk6UbIUrCsmu7ZqR-1)
 
