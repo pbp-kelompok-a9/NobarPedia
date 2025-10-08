@@ -1,9 +1,15 @@
 # 📺 NobarPedia 📺
-## Proyek Tengah Semester Mata Kuliah PBP 25/26
+## Proyek Tengah Semester Mata Kuliah Pemrograman Berbasis Platform 25/26
 
 ---
 
-## Anggota Kelompok
+## ❓ Apa itu NobarPedia?
+
+**NobarPedia** adalah website komunitas yang memudahkan kamu untuk mencari dan berbagi informasi seputar tempat nonton bareng di seluruh Indonesia. Di sini, kamu bisa menemukan berbagai lokasi nobar berdasarkan jarak terdekat, waktu pertandingan, atau tempat nobar yang paling rame. Kamu juga bisa menambahkan tempat nobar baru, daftar untuk ikut nonton di suatu lokasi, memberi review, dan berbagi rekomendasi dengan teman-temanmu. Dengan NobarPedia, nyari tempat nobar jadi lebih seru, gampang, dan bikin kamu makin deket sama sesama pecinta nobar!
+
+---
+
+## 👨‍👨‍👦‍👦 Anggota Kelompok
 
 | NPM | Nama | Akun Github |
 | :-- | :--- | :---------- |
@@ -14,4 +20,6 @@
 | 2406362860 | Muhammad Lanang Zalkifla Harits | r3gulus-4rcturus |
 
 ---
+
+
 
