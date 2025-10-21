@@ -5,9 +5,8 @@ from django.urls import reverse
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from join.forms import JoinForm
 
-def tes(request):
-    context = {}
-    return render(request, "tes.html", context)
+def show_tes(request):
+    return render(request, "tes.html")
 
 
 def post_join(request):
@@ -23,7 +22,7 @@ def post_join(request):
         join_entry.nobar_place = None
 
         join_entry.save()
-        return redirect('main:tes')
+        return redirect('join:show_tes')
 
     context = {'form': form}
     return render(request, "post_join.html", context)
@@ -57,12 +56,12 @@ def get_join_record(request, id):
     except Join_List.DoesNotExist:
         return JsonResponse({'detail': 'Not found'}, status=404)
 
-def update_join(request):
+def update_join(request, id):
     join_record = get_object_or_404(Join_List, pk=id)
     form = JoinForm(request.POST or None, instance=join_record)
     if form.is_valid() and request.method == 'POST':
         form.save()
-        return redirect('main:tes')
+        return redirect('join:show_tes')
 
     context = {
         'form': form
@@ -73,4 +72,4 @@ def update_join(request):
 def delete_join(request, id):
     join_record = get_object_or_404(Join_List, pk=id)
     join_record.delete()
-    return HttpResponseRedirect(reverse('main:tes'))
+    return HttpResponseRedirect(reverse('join:show_tes'))
