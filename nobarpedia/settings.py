@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'homepage',
     'review',
     'match'
+    'join',
 ]
 
 MIDDLEWARE = [

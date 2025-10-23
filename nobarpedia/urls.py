@@ -23,6 +23,7 @@ app_name = 'main'
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('join/', include('join.urls')),
 ]
 
 # Untuk serve profile picture
