@@ -24,7 +24,7 @@
                 <div>Email: {{ user.email }} </div>
                 <div>Fullname: {{ user.profile.fullname }} </div>
                 <div>Bio: {{ user.profile.bio }} </div>
-                <img src="{{ user.profile.profile_picture }}"></img>
+                <img width=300 height=400 src={{ user.profile.profile_picture.url }}></img>
                 {% comment %} <div> {{ user.id }} </div>
                 <div> {{ request.user.id }} </div> {% endcomment %}
 
