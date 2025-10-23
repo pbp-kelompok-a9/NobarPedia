@@ -1,6 +1,6 @@
 from django.urls import path
 from homepage.views import show_homepage, create_spot,show_spot
-from homepage.views import delete_spot
+from homepage.views import delete_spot, show_json
 
 app_name = 'homepage'
 
@@ -9,4 +9,5 @@ urlpatterns = [
     path('create-spot/',create_spot, name='create_spot'),
     path('spot/<str:id>/',show_spot,name='show_spot'),
     path('spot<uuid:id>/delete', delete_spot,name='delete_spot'),
+    path('json/', show_json, name='show_json'),
 ]
