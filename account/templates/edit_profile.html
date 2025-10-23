@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block meta %}
-<title>Edit News - Football News</title>
+<title>Edit Profile</title>
 {% endblock meta %}
 
 {% block content %}
@@ -134,15 +134,20 @@
 
 const deleteButton = document.getElementById('deleteButton');
 const changePasswordButton = document.getElementById('changePasswordButton');
-const user_id = {{ form.instance.id }}
+const user_id = {{ form.instance.id }};
 
 deleteButton.addEventListener('click', () => {
   showDeleteModal({user_id: user_id });
 });
 
 changePasswordButton.addEventListener('click', () => {
-    window.location.href = `{% url 'account:change_password' ${user_id} %}`;
-})
+  // Build URL safely in JS using the server-provided user id
+  console.log('oke kita redirect ya')
+  url_address = "{% url 'account:change_password' 0 %}".replace('0', user_id);
+  setTimeout(() => {
+      window.location.href = url_address;
+  }, 200);
+});
 
 </script>
 {% endblock %}

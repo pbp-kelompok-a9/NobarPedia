@@ -1,4 +1,4 @@
-from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm
 from account.forms import CustomUserCreationForm, CustomUserEditForm
 
 from account.models import Profile
@@ -7,7 +7,7 @@ from django.contrib.auth.models import User
 from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
 from django.contrib import messages
 from django.views.decorators.csrf import csrf_exempt
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.core import serializers
@@ -88,6 +88,26 @@ def delete_profile(request, id):
 #   user.delete()
 #   return HttpResponseRedirect(reverse('account:admin'))
   
+@login_required(login_url='/account/login')
+def change_password(request, id):
+    if request.user.id != id:
+        print('ga boleh edit punya orang  lain bro', request.user.id, " ", id)
+        return HttpResponseRedirect(reverse('account:show_user'))
+    
+    user = get_object_or_404(User, pk=id)
+    if request.method == 'POST':
+        form = PasswordChangeForm(user, request.POST)
+        if form.is_valid():
+            user = form.save()
+            update_session_auth_hash(request, user) # agar user ga ke logout otomatis, langsung update session dengan password yg baru
+            messages.success(request, 'Your password was successfully updated!')
+            return redirect('account:edit_profile', id=id)
+        else:
+            messages.error(request, 'Please correct the error below.')
+    else:
+        form = PasswordChangeForm(user)
+
+    return render(request, 'change_password.html', {'form': form})
 
 @login_required(login_url='/account/login')
 def show_user(request):
