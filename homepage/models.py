@@ -12,7 +12,7 @@ class NobarSpot(models.Model):
     time = models.TimeField()
     city = models.CharField(max_length=200)
     address = models.TextField()
-    host = models.ForeignKey(User, on_delete=models.CASCADE)
+    host = models.ForeignKey(User, on_delete=models.CASCADE, related_name='hosted_nobars_homepage')
 
     def __str__(self):
         return self.name
