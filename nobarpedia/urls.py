@@ -25,6 +25,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('account/', include('account.urls', namespace='account')),
     path('homepage/',include('homepage.urls')),
+    path('', include('review.urls')),
 ]
 
 # Untuk serve profile picture
