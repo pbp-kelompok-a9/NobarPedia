@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block meta %}
+<title>View Profile</title>
+{% endblock meta %}
+
+{% block content %}
+{% include 'delete_modal.html' %}
+<div class="bg-gray-50 w-full min-h-screen">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    
+        <!-- Back Navigation -->
+        <div class="mb-6">
+            <a href="{% url 'account:show_user' %}" class="text-gray-600 hover:text-gray-900 font-medium transition-colors">
+                ← Back to Home
+            </a>
+        </div>
+    
+        <div class="bg-white rounded-lg border border-gray-200 p-6 sm:p-8 form-style">
+            <div class="mb-8">
+                <h1 class="text-2xl font-bold text-gray-900 mb-2">View Profile</h1>
+                <div>Username: {{ user.username }} </div>
+                <div>Email: {{ user.email }} </div>
+                <div>Fullname: {{ user.profile.fullname }} </div>
+                <div>Bio: {{ user.profile.bio }} </div>
+                <img src="{{ user.profile.profile_picture }}"></img>
+                {% comment %} <div> {{ user.id }} </div>
+                <div> {{ request.user.id }} </div> {% endcomment %}
+
+                {% comment %} {{ show_update_button }} {% endcomment %}
+
+                <div></div>
+
+                <button id="editButton" class="hidden order-1 sm:order-2 flex-1 bg-red-600 text-white px-6 py-3 rounded-md font-medium hover:bg-green-700 transition-colors">
+                    Edit Profile
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+const user_id = {{ user.id }};
+const showUpdateButton = "{{ show_update_button }}";
+const editButton = document.getElementById('editButton');
+
+setTimeout(() => {
+    //console.log("a")
+    if (showUpdateButton == "True") {
+        //console.log("geez")
+        editButton.classList.remove('hidden');    
+    }
+}, 10);
+
+
+editButton.addEventListener('click', () => {
+    // console.log('oke kita redirect ya')
+    url_address = "{% url 'account:edit_profile' 0 %}".replace('0', user_id);
+    setTimeout(() => {
+        window.location.href = url_address;
+    }, 10);
+});
+
+</script>
+{% endblock %}

@@ -60,6 +60,15 @@ def logout_user(request):
     # response.delete_cookie('last_login')
     return response
 
+def view_profile(request, id):
+    show_update_button = False
+    if (request.user.id == id):
+        show_update_button = True
+        
+    user = get_object_or_404(User, pk=id)
+    context = {"user" : user, "show_update_button": show_update_button}
+    return render(request, "view_profile.html", context)
+
 @login_required(login_url='/account/login')
 def edit_profile(request, id):
     if request.user.id != id:
@@ -69,7 +78,7 @@ def edit_profile(request, id):
     form = CustomUserEditForm(request.POST or None, instance=user)
     if form.is_valid() and request.method == 'POST':
         form.save()
-        return redirect('account:show_user')
+        return redirect('account:view_profile', id=id)
     context = {'form': form }
     return render(request, "edit_profile.html", context)
   
