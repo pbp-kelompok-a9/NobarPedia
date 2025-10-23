@@ -11,12 +11,15 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+from django.urls import reverse_lazy
 import os
 from dotenv import load_dotenv
 load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = '/media/'
 
 
 # Quick-start development settings - unsuitable for production
@@ -48,6 +51,7 @@ INSTALLED_APPS = [
     'account',
     'homepage',
     'review',
+    'match'
 ]
 
 MIDDLEWARE = [
@@ -156,3 +160,6 @@ else:
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+LOGIN_URL = reverse_lazy('users:login_page')
+LOGIN_REDIRECT_URL = reverse_lazy('main:show_main')
