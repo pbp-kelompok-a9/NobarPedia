@@ -24,7 +24,12 @@
                 <div>Email: {{ user.email }} </div>
                 <div>Fullname: {{ user.profile.fullname }} </div>
                 <div>Bio: {{ user.profile.bio }} </div>
-                <img width=300 height=400 src={{ user.profile.profile_picture.url }}></img>
+
+                {% if user.profile.profile_picture %}
+                    <img width=300 height=400 src={{ user.profile.profile_picture.url }}></img>
+                {% else %}
+                    <img width=300 height=400 src="{% static 'image/no-profile-picture.svg' %}"></img>
+                {% endif %}
                 {% comment %} <div> {{ user.id }} </div>
                 <div> {{ request.user.id }} </div> {% endcomment %}
 
