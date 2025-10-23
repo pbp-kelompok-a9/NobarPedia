@@ -7,7 +7,7 @@ h1 {
     line-height: normal;
 }
 
-h2{
+h2 {
     color: #FFF;
     font-family: Anton;
     font-size: 55px;
@@ -16,7 +16,7 @@ h2{
     line-height: normal;
 }
 
-h3{
+h3 {
     color: #FFF;
     font-family: Anton;
     font-size: 50px;
@@ -25,7 +25,7 @@ h3{
     line-height: normal;
 }
 
-h4{
+h4 {
     color: #FFF;
     font-family: Anton;
     font-size: 40px;
@@ -34,7 +34,7 @@ h4{
     line-height: normal;
 }
 
-h5{
+h5 {
     color: #FFF;
     font-family: Anton;
     font-size: 30px;
@@ -43,7 +43,7 @@ h5{
     line-height: normal;
 }
 
-.headline{
+.headline {
     color: #FFF;
     font-family: Poppins;
     font-size: 25px;
@@ -52,7 +52,7 @@ h5{
     line-height: normal;
 }
 
-.bodyL{
+.bodyL {
     color: #FFF;
     font-family: Poppins;
     font-size: 20px;
@@ -61,7 +61,7 @@ h5{
     line-height: normal;
 }
 
-.body{
+.body {
     color: #FFF;
     font-family: Poppins;
     font-size: 18px;
@@ -70,7 +70,7 @@ h5{
     line-height: normal;
 }
 
-.footnote{
+.footnote {
     color: #FFF;
     font-family: Poppins;
     font-size: 16px;
@@ -79,7 +79,7 @@ h5{
     line-height: normal;
 }
 
-.caption{
+.caption {
     color: #FFF;
     font-family: Poppins;
     font-size: 14px;
@@ -88,11 +88,29 @@ h5{
     line-height: normal;
 }
 
-.small{
+.small {
     color: #FFF;
     font-family: Poppins;
     font-size: 13px;
     font-style: normal;
     font-weight: 400;
     line-height: normal;
+}
+
+.font_anta {
+    font-family: "Anta", sans-serif;
+    font-weight: 400;
+    font-style: normal;
+}
+
+.font_anton {
+    font-family: "Anton", sans-serif;
+    font-weight: 400;
+    font-style: normal;
+}
+
+.font_poppins {
+    font-family: "Poppins", sans-serif;
+    font-weight: 400;
+    font-style: normal;
 }
