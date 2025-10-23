@@ -22,7 +22,7 @@ def login_user(request):
         if form.is_valid():
             user = form.get_user()
             login(request, user)
-            response = HttpResponseRedirect(reverse("account:show_user"))
+            response = HttpResponseRedirect(reverse("homepage:show_homepage"))
             # response.set_cookie('last_login', str(datetime.datetime.now()))
             return response
     else:
@@ -73,7 +73,7 @@ def view_profile(request, id):
 def edit_profile(request, id):
     if request.user.id != id:
         # print('ga boleh edit punya orang  lain bro', request.user.id, " ", id)
-        return HttpResponseRedirect(reverse('account:show_user'))
+        return HttpResponseRedirect(reverse('homepage:show_homepage'))
     user = get_object_or_404(User, pk=id)
     form = CustomUserEditForm(request.POST or None, instance=user)
     if form.is_valid() and request.method == 'POST':
@@ -101,7 +101,7 @@ def delete_profile(request, id):
 def change_password(request, id):
     if request.user.id != id:
         print('ga boleh edit punya orang  lain bro', request.user.id, " ", id)
-        return HttpResponseRedirect(reverse('account:show_user'))
+        return HttpResponseRedirect(reverse('homepage:show_homepage'))
     
     user = get_object_or_404(User, pk=id)
     if request.method == 'POST':
