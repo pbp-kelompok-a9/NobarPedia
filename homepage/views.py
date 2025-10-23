@@ -1,12 +1,15 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from homepage.forms import NobarSpotForm
 from homepage.models import NobarSpot
+from django.http import HttpResponseRedirect
+from django.urls import reverse
 
 # Create your views here.
 def show_homepage(request):
     nobarSpot_list = NobarSpot.objects.all()
     context={
-        'nobarSpot_list' : nobarSpot_list
+        'nobarSpot_list' : nobarSpot_list,
+        'name': request.user.username,
     }
     return render(request, "homepage.html",context)
 
@@ -26,3 +29,8 @@ def show_spot(request):
         'nobarSpot' : nobarSpot
     }
     return render(request, "spot_detail.html",context)
+
+def delete_spot(request,id):
+    nobarSpot = get_object_or_404(NobarSpot,pk=id)
+    nobarSpot.delete()
+    return HttpResponseRedirect(reverse('main:show_main'))
