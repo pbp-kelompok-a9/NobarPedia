@@ -27,22 +27,32 @@ def login_user(request):
             return response
     else:
         form = AuthenticationForm(request)
-
     context = {'form': form}
     return render(request, 'login.html', context)
 
 def register_user(request):
+    form = CustomUserCreationForm()
+    # if request.method == "POST":
+    #     form = CustomUserCreationForm(request.POST, request.FILES)
+    #     if form.is_valid():
+    #         user = form.save()
+    #         user.save()
+    #         messages.success(request, 'Your account has been successfully created!')
+    #         return redirect('account:login')
+    
+    context = {'form': form}
+    return render(request, 'register.html', context)
+  
+def register_ajax(request):
     if request.method == "POST":
         form = CustomUserCreationForm(request.POST, request.FILES)
         if form.is_valid():
             user = form.save()
-            user.save()
-            messages.success(request, 'Your account has been successfully created!')
-            return redirect('account:login')
-    else:
-        form = CustomUserCreationForm()
-    context = {'form': form}
-    return render(request, 'register.html', context)
+            return JsonResponse({"success": True, "message": "Account created successfully!"})
+        else:
+            # Return form errors in JSON
+            return JsonResponse({"success": False, "errors": form.errors})
+    return JsonResponse({"success": False, "message": "Invalid request method."}, status=400)
   
 def logout_user(request):
     logout(request)
@@ -52,17 +62,32 @@ def logout_user(request):
 
 @login_required(login_url='/account/login')
 def edit_profile(request, id):
+    if request.user.id != id:
+        # print('ga boleh edit punya orang  lain bro', request.user.id, " ", id)
+        return HttpResponseRedirect(reverse('account:show_user'))
     user = get_object_or_404(User, pk=id)
     form = CustomUserEditForm(request.POST or None, instance=user)
     if form.is_valid() and request.method == 'POST':
         form.save()
         return redirect('account:show_user')
-
-    context = {
-        'form': form
-    }
-
+    context = {'form': form }
     return render(request, "edit_profile.html", context)
+  
+@login_required(login_url='/account/login')
+@csrf_exempt
+def delete_profile(request, id):
+  user = get_object_or_404(User, pk=id)
+  user.delete()
+  return HttpResponseRedirect(reverse('account:login'))
+
+# @login_required(login_url='/account/login')
+# def delete_profile_from_admin(request, id):
+#   if not request.user.is_staff:
+#     return HttpResponseRedirect(reverse('account:admin'))
+#   user = get_object_or_404(User, pk=id)
+#   user.delete()
+#   return HttpResponseRedirect(reverse('account:admin'))
+  
 
 @login_required(login_url='/account/login')
 def show_user(request):

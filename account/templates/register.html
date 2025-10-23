@@ -170,4 +170,48 @@
     </div>
   </div>
 </div>
+
+<script>
+document.querySelector("form").addEventListener("submit", async function(e) {
+  e.preventDefault();
+
+  const formData = new FormData(this);
+
+  const response = await fetch("{% url 'account:register_ajax' %}", {
+    method: "POST",
+    headers: { "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value },
+    body: formData,
+  });
+
+  const data = await response.json();
+
+  const msgContainer = document.createElement("div");
+  msgContainer.classList.add("mt-4");
+  const errorElements = document.querySelectorAll('.error-elements');
+  errorElements.forEach(el => el.remove());
+
+  if (data.success) {
+    // showToast("✅ You're account has been registered!", "Please log in to access the website.", "updated");
+    this.reset();
+
+    console.log('anj')
+
+    setTimeout(() => {
+      window.location.href = "{% url 'account:login' %}";
+    }, 1500);
+  } else {
+    msgContainer.innerHTML = "";
+    for (const [field, errors] of Object.entries(data.errors || {})) {
+      errors.forEach(err => {
+        msgContainer.innerHTML += `
+          <div class="error-elements px-4 py-3 mb-2 rounded text-sm border bg-red-50 border-red-200 text-red-700">
+            <strong>${field}:</strong> ${err}
+          </div>`;
+      });
+    }
+  }
+
+  this.insertAdjacentElement("afterend", msgContainer);
+});
+</script>
 {% endblock content %}

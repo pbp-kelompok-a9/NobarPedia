@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 from .models import Profile
 
 class CustomUserCreationForm(UserCreationForm):
-    email = forms.EmailField(required=True)
+    # email = forms.EmailField(required=True)
     fullname = forms.CharField(max_length=100, required=True)
     bio = forms.CharField(widget=forms.Textarea, required=False)
     location = forms.CharField(max_length=100, required=False)
@@ -32,7 +32,7 @@ class CustomUserCreationForm(UserCreationForm):
 
 
 class CustomUserEditForm(forms.ModelForm):
-    # email = forms.EmailField(required=True)
+    email = forms.EmailField(required=True)
     fullname = forms.CharField(max_length=100, required=True)
     bio = forms.CharField(widget=forms.Textarea, required=False)
     location = forms.CharField(max_length=100, required=False)
@@ -46,6 +46,8 @@ class CustomUserEditForm(forms.ModelForm):
         super(CustomUserEditForm, self).__init__(*args, **kwargs)
         # Isi field dari model Profile jika ada
         if self.instance and hasattr(self.instance, 'profile'):
+            self.fields['username'].initial = self.instance.username
+            self.fields['email'].initial = self.instance.email
             self.fields['fullname'].initial = self.instance.profile.fullname
             self.fields['bio'].initial = self.instance.profile.bio
             self.fields['location'].initial = self.instance.profile.location
