@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block meta %}
+<title>NobarPedia</title>
+{% endblock meta %}
+
+{% block content %}
+{% include 'navbar.html' %}
+<section class="relative min-h-screen flex flex-col items-center justify-center bg-[#1E1E1E] text-white px-6 overflow-hidden">
+
+    <!-- Rectangle blur -->
+    <div class="absolute bottom-0 left-0 w-full h-[130px] bg-[#0B6044]/50 blur-2xl "></div>
+
+  <!-- Gambar latar -->
+  <div class="hidden md:flex absolute inset-0 flex items-center justify-center pointer-events-none">
+    <!-- kiri atas -->
+    <img src="{% static 'image/homepage1.png' %}" 
+         class="absolute top-20 -left-20 w-24 md:w-96 rounded-xl object-cover" alt="">
+    <!-- kanan atas -->
+    <img src="{% static 'image/homepage2.png' %}" 
+         class="absolute top-20 -right-20 w-24 md:w-96 rounded-xl object-cover" alt="">
+    <!-- kiri bawah -->
+    <img src="{% static 'image/homepage2.png' %}" 
+         class="absolute bottom-4 -left-40 w-24 md:w-96 rounded-xl object-cover" alt="">
+    <!-- kanan bawah -->
+    <img src="{% static 'image/homepage1.png' %}" 
+         class="absolute bottom-4 -right-40 w-24 md:w-96 rounded-xl object-cover" alt="">
+  </div>
+
+    <!-- Desktop teks -->
+  <div class="hidden md:block relative text-center max-w-xl z-10">
+    <h1 class="text-5xl mb-4 tracking-wide">LOREM IPSUM DOLORES</h1>
+    <p class="text-gray-300 mb-6 text-base">
+      Temukan tempat nobar terbaik di sekitarmu. Gabung komunitas sesama pecinta bola dan rasakan atmosfer pertandingan bersama!
+    </p>
+    <button class="bg-green-600 hover:bg-green-700 text-white font-medium px-6 py-3 rounded-md transition-colors">
+      Cari tempat nobar
+    </button>
+  </div>
+
+   <!-- Mobile teks -->
+  <div class="flex flex-col items-center justify-center md:hidden z-10">
+    <!-- Teks -->
+    <h1 class="text-2xl mb-3 text-center tracking-wide">LOREM IPSUM DOLORES</h1>
+    <p class="text-gray-300 text-center mb-4 text-sm">
+      Temukan tempat nobar terbaik di sekitarmu. Gabung komunitas sesama pecinta bola dan rasakan atmosfer pertandingan bersama!
+    </p>
+    <button class="bg-green-600 hover:bg-green-700 text-white font-medium px-4 py-2 rounded-md mb-6 transition-colors">
+      Cari tempat nobar
+    </button>
+
+    <!-- Gambar Mobile -->
+    <div class="relative w-full max-w-xl grid grid-cols-2 gap-0 mt-4">
+    <!-- kiri -->
+    <img 
+        src="{% static 'image/homepage1.png' %}" 
+        class="w-full h-32 object-cover rounded-xl -translate-x-8 md:-translate-x-20" 
+        alt="">
+    <!-- kanan -->
+    <img 
+        src="{% static 'image/homepage2.png' %}" 
+        class="w-full h-32 object-cover rounded-xl translate-x-8 md:translate-x-20" 
+        alt="">
+    </div>
+
+  </div>
+
+
+</section>
+
+
+{% endblock content %}

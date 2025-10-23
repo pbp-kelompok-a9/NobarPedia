@@ -24,6 +24,7 @@ app_name = 'main'
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('account/', include('account.urls', namespace='account')),
+    path('homepage/',include('homepage.urls')),
 ]
 
 # Untuk serve profile picture
