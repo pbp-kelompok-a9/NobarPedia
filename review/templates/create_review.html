@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% block meta %}
+<title>Add Review</title>
+{% endblock meta %}
+
+{% block content %}
+<div class="bg-black w-full min-h-screen">
+  <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    
+    <!-- Back Navigation -->
+    <div class="mb-6">
+      <a href="{% url 'review:show_test' %}" class="text-green-600 hover:text-green-300 font-medium transition-colors">
+        ← Back to Reviews
+      </a>
+    </div>
+    
+    <!-- Form -->
+    <div class="flex bg-black rounded-lg border border-gray-200 p-6 sm:p-8 form-style align-content:center ">
+      <div class="block mb-8 text-align:center">
+        <h1 class="text-white font-bold">ADD A REVIEW</h1>
+      </div>
+      
+      <form method="POST" class="space-y-6">
+        {% csrf_token %}
+        {% for field in form %}
+          <div>
+            <label for="{{ field.id_for_label }}" class="block text-l font-medium text-white mb-2 text-align:center">
+              {{ field.label }}
+            </label>
+            <div class="w-full">
+              {{ field }}
+            </div>
+            {% if field.help_text %}
+              <p class="mt-1 text-sm text-white">{{ field.help_text }}</p>
+            {% endif %}
+            {% for error in field.errors %}
+              <p class="mt-1 text-sm text-red-600">{{ error }}</p>
+            {% endfor %}
+          </div>
+        {% endfor %}
+        
+        <div class="flex flex-col sm:flex-row gap-4 pt-6 border-t border-gray-200">
+          
+          <button type="submit" class="order-1 sm:order-2 flex-1 bg-green-600 text-black px-6 py-3 rounded-md font-medium hover:bg-green-300 transition-colors">
+            Publish Review
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
