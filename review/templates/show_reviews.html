@@ -6,9 +6,11 @@
         <!--Nobar Spot Display Section-->
         <div>
             <div class="block text-white text-align:center">
-                <img width="600" height="300" style="float:left"/>
+                <img src="{{ nobar_spot.thumbnail }}" width="600" height="300" style="float:left"/>
                 <div class="block text-blue text-align:center font-size=70px">
-                    <h1 style="">NAMA TEM</h1>
+                    <h1 style="">{{nobar_spot.name}}</h1>
+                    {{nobar_spot.home_team}} vs {{nobar_spot.home_team}}
+                    <a href="{% url 'join:post_join' %}">  Join </a>
                 </div>
             </div>
             

@@ -1,4 +1,5 @@
-from review.models import reviewers, NobarSpot
+from review.models import reviewers
+from homepage.models import NobarSpot
 from django.shortcuts import render, redirect, get_object_or_404, get_list_or_404
 from django.urls import reverse
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
@@ -10,7 +11,7 @@ def show_test(request):
     
 def show_reviews(request, id):
     get_nobar_spot = get_object_or_404(NobarSpot, pk=id)
-    review_list = reviewers.objects.filter(nobar_spot=get_nobar_spot)
+    review_list = reviewers.objects.filter(nobar_place=get_nobar_spot)
     context = {
         'review_list':review_list,
         'nobar_spot':get_nobar_spot
