@@ -31,7 +31,7 @@
 
     <!-- Desktop teks -->
   <div class="hidden md:block relative text-center max-w-xl z-10">
-    <h1 class="text-5xl mb-4 tracking-wide">LOREM IPSUM DOLORES</h1>
+    <h1 class="text-5xl mb-4 tracking-wide">Welcome to Nobar<span class="text-green-500">Pedia</span></h1>
     <p class="text-gray-300 mb-6 text-base">
       Temukan tempat nobar terbaik di sekitarmu. Gabung komunitas sesama pecinta bola dan rasakan atmosfer pertandingan bersama!
     </p>
@@ -44,7 +44,7 @@
    <!-- Mobile teks -->
   <div class="flex flex-col items-center justify-center md:hidden z-10">
     <!-- Teks -->
-    <h1 class="text-2xl mb-3 text-center tracking-wide">LOREM IPSUM DOLORES</h1>
+    <h1 class="text-2xl mb-3 text-center tracking-wide">Welcome to Nobar<span class="text-green-500">Pedia</span></h1>
     <p class="text-gray-300 text-center mb-4 text-sm">
       Temukan tempat nobar terbaik di sekitarmu. Gabung komunitas sesama pecinta bola dan rasakan atmosfer pertandingan bersama!
     </p>
@@ -138,9 +138,7 @@
   <div id="empty" class="hidden text-center py-16">
     <h3 class="text-xl mb-2">No spots found</h3>
     <p class="text-gray-400 mb-6">Be the first to create a new spot!</p>
-    <a href="{% url 'homepage:create_spot' %}" class="bg-green-600 hover:bg-green-700 text-white font-medium px-5 py-2 rounded-md transition">
-      + Add New Spot
-    </a>
+    
   </div>
 
   <!-- Grid Container -->
@@ -190,7 +188,7 @@ function buildSpotCard(spot) {
     const div = document.createElement('div');
     div.className = "bg-white rounded-xl shadow hover:shadow-lg transition overflow-hidden text-gray-900 flex flex-col";
 
-    const linkDetail = `{% url 'homepage:show_homepage'%}`;
+    const linkDetail = `{% url 'review:show_reviews' '00000000-0000-0000-0000-000000000000' %}`.replace('00000000-0000-0000-0000-000000000000', spot.id);
     const linkEdit = `{% url 'homepage:edit_spot' '00000000-0000-0000-0000-000000000000' %}`.replace('00000000-0000-0000-0000-000000000000', spot.id);
     const linkDelete = `{% url 'homepage:delete_spot' '00000000-0000-0000-0000-000000000000' %}`.replace('00000000-0000-0000-0000-000000000000', spot.id);
 
