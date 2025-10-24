@@ -128,10 +128,10 @@ def change_password(request, id):
         if form.is_valid():
             user = form.save()
             update_session_auth_hash(request, user) # agar user ga ke logout otomatis, langsung update session dengan password yg baru
-            messages.success(request, 'Your password was successfully updated!')
+            #messages.success(request, 'Your password was successfully updated!')
             return redirect('account:edit_profile', id=id)
-        else:
-            messages.error(request, 'Please correct the error below.')
+        #else:
+            #messages.error(request, 'Please correct the error below.')
     else:
         form = PasswordChangeForm(user)
 
