@@ -5,8 +5,8 @@ from django.urls import reverse
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from join.forms import JoinForm
 
-def show_tes(request):
-    return render(request, "tes.html")
+def show_join(request):
+    return render(request, "join.html")
 
 
 def post_join(request):

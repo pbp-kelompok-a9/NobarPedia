@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% block content %}
+{% include 'navbar.html' %}
+<div class=" text-white w-screen h-full pt-16 flex flex-col  items-center">
+  
+  <div class="w-[80vw] aspect-[5/1] my-6 overflow-clip relative rounded flex">
+      <img src="https://image.idntimes.com/post/20250609/1000437318.jpg" class="absolute object-cover w-full h-full -z-10 opacity-50" alt="banner">
+      <div class="w-1/2 p-4 self-end">
+        <h1 class="text-2xl mb-2 text-4xl">Bring the <span class="text-green-500">Stadium</span> Closer to You</h1>
+        <h2 class="font_poppins text-[0.7rem]">Experience the thrill of football, together</h2>
+      </div>
+    </div>
+  </div>
+
+  <div class="w-[80vw] flex text-center mx-auto bg-neutral-700 rounded text-sm py-1 mb-8">
+    <a id="filter-joined-spots" class="w-1/2">Joined Spot</a>
+    <a id="filter-my-spots" class="w-1/2">My Nobar Spot</a>
+  </div>
+
+  <div class="w-[70vw] grid grid-cols-2 gap-8 mx-auto">
+    
+    <div class="bg-neutral-700 w-full h-40 rounded p-2">
+      <div class="w-full flex justify-between">
+        <div>Nama Tempattttt</div>
+        <div>🕐 22.00 - 00.00</div>
+      </div>
+      <div class="text-neutral-400 text-sm">Jakarta Timur</div>
+      <div></div>
+      <div></div>
+    </div>
+    <div class="bg-neutral-700 w-full h-40 rounded">
+
+    </div>
+    <div class="bg-neutral-700 w-full h-40 rounded">
+
+    </div>
+    <div class="bg-neutral-700 w-full h-40 rounded">
+
+    </div>
+    <div class="bg-neutral-700 w-full h-40 rounded">
+
+    </div>
+    <div class="bg-neutral-700 w-full h-40 rounded">
+
+    </div>
+    <div class="bg-neutral-700 w-full h-40 rounded">
+
+    </div>
+    <div class="bg-neutral-700 w-full h-40 rounded">
+
+    </div>
+  </div>   
+</div>
+{% endblock content%}
