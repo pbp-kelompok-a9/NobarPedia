@@ -117,7 +117,157 @@
 
   </div>
 
+    <!-- Loading Spinner -->
+  <div id="loading" class="bg-[#1E1E1E] text-center py-12 hidden">
+    <svg class="animate-spin h-8 w-8 text-green-600 inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+    </svg>
+    <p class="text-gray-400 mt-3">Loading spots...</p>
+  </div>
+
+  <!-- Error State -->
+  <div id="error" class="hidden text-red-500 text-center py-12">Failed to load spots. Please try again later.</div>
+
+  <!-- Empty State -->
+  <div id="empty" class="hidden text-center py-16">
+    <img src="{% static 'image/no-news.png' %}" alt="No spots" class="w-40 h-40 mx-auto mb-4 opacity-80">
+    <h3 class="text-xl font-semibold mb-2">No spots found</h3>
+    <p class="text-gray-400 mb-6">Be the first to create a new spot!</p>
+    <a href="{% url 'homepage:create_spot' %}" class="bg-green-600 hover:bg-green-700 text-white font-medium px-5 py-2 rounded-md transition">
+      + Add New Spot
+    </a>
+  </div>
+
+  <!-- Grid Container -->
+  <div id="spot-grid" class="hidden grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-12 w-[90%] md:w-[80%]"></div>
+
+
 </section>
+
+<script>
+const SPOT_API = "{% url 'homepage:show_json' %}";
+const CURRENT_USER_ID = "{{ user.id|default_if_none:'' }}";
+
+const loading = document.getElementById('loading');
+const error = document.getElementById('error');
+const empty = document.getElementById('empty');
+const grid = document.getElementById('spot-grid');
+
+const allBtn = document.querySelectorAll("button")[0]; // All Spot
+const yourBtn = document.querySelectorAll("button")[1]; // Your Spot
+
+let allSpots = [];
+let activeFilter = 'all';
+
+// Toggle visibility
+function showSection({ loading: showLoading=false, error: showError=false, empty: showEmpty=false, grid: showGrid=false }) {
+  loading.classList.toggle('hidden', !showLoading);
+  error.classList.toggle('hidden', !showError);
+  empty.classList.toggle('hidden', !showEmpty);
+  grid.classList.toggle('hidden', !showGrid);
+}
+
+// Build one card
+function buildSpotCard(spot) {
+    const div = document.createElement('div');
+    div.className = "bg-white rounded-xl shadow hover:shadow-lg transition overflow-hidden text-gray-900 flex flex-col"; // Kelas container utama
+
+    const joinUrl = `/join/${spot.id}`;
+    const editUrl = `/homepage/edit-spot/${spot.id}`;
+    const deleteUrl = `/homepage/delete-spot/${spot.id}`;
+    const formattedTime = spot.time ? spot.time.split(':').slice(0, 2).join(':') : '';
+
+    div.innerHTML = `
+        <div class="p-2"> 
+            <div class="aspect-[16/9] overflow-hidden rounded-lg">
+                <img src="${spot.thumbnail || 'https://placehold.co/600x400'}" class="w-full h-full object-cover" alt="thumbnail">
+            </div>
+        </div>
+
+        <div class="p-4 flex flex-col flex-1">
+            <div class="mb-3">
+                <span class="bg-white text-[#2CAC5C] text-sm font-medium me-2 px-2.5 py-0.5 rounded-full border border-[#2CAC5C]">${spot.home_team} vs ${spot.away_team}</span>
+            </div>
+
+            <div class="flex justify-between items-start mb-2">
+                <h3 class=" headline text-lg leading-tight flex-1 text-black truncate">${spot.name}</h3>
+                <p class="footnote text-xs text-gray-500 whitespace-nowrap ml-4">${new Date(spot.date).toLocaleDateString('en-US', { month:'short',day:'2-digit' })} | ${formattedTime}</p>
+            </div>
+            <p class="footnote text-sm text-gray-500 mb-4">${spot.city}</p>
+            
+            <div class="mt-auto flex items-center pt-2">
+               <a href="${joinUrl}" class="flex-1 bg-green-600 hover:bg-green-700 text-white text-base font-medium px-4 py-2 rounded-md text-center">Detail</a>
+               ${Number(CURRENT_USER_ID) === Number(spot.host_id)
+                ? `
+                    <div class="flex gap-2 ml-3"> 
+                      <a href="${editUrl}" class="text-green-600 hover:text-green-700 text-sm font-medium py-2 px-1">
+                      Edit
+                      </a>
+                      <a href="${deleteUrl}" 
+                          onclick="return confirm('Apakah Anda yakin ingin menghapus Spot ini?')"
+                          class="text-red-600 hover:text-red-700 text-sm font-medium py-2 px-1">
+                          Hapus
+                      </a>
+                      </div>
+                    `
+                  : ''
+                 }
+             </div>
+
+
+        </div>
+    `;
+    return div;
+}
+
+// Render grid
+function renderSpots(spots) {
+  grid.innerHTML = '';
+  spots.forEach(s => grid.appendChild(buildSpotCard(s)));
+}
+
+// Filter
+function filterSpots() {
+  const filtered = activeFilter === 'all'
+    ? allSpots
+    : allSpots.filter(s => Number(s.host_id) === Number(CURRENT_USER_ID));
+
+  if (filtered.length === 0) {
+    showSection({ empty: true });
+  } else {
+    renderSpots(filtered);
+    showSection({ grid: true });
+  }
+}
+
+// Fetch
+async function fetchSpots() {
+  try {
+    showSection({ loading: true });
+    const res = await fetch(SPOT_API);
+    if (!res.ok) throw new Error("Failed to fetch");
+    const data = await res.json();
+    allSpots = data;
+    filterSpots();
+  } catch (e) {
+    showSection({ error: true });
+  }
+}
+
+// Buttons
+allBtn.addEventListener('click', () => {
+  activeFilter = 'all';
+  fetchSpots();
+});
+yourBtn.addEventListener('click', () => {
+  activeFilter = 'your';
+  fetchSpots();
+});
+
+// Start
+fetchSpots();
+</script>
 
 
 {% endblock content %}

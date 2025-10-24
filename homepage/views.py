@@ -23,6 +23,21 @@ def create_spot(request):
     context = {'form':form}
     return render(request, "create_spot.html", context)
 
+
+def edit_spot(request, id):
+    nobarSpot = get_object_or_404(NobarSpot, pk=id)
+    form = NobarSpotForm(request.POST or None, instance=nobarSpot)
+
+    if form.is_valid() and request.method == 'POST':
+        form.save()
+        return redirect('homepage:show_homepage')
+
+    context = {
+        'form': form
+    }
+
+    return render(request, "edit_spot.html", context)
+
 def show_spot(request):
     nobarSpot = get_object_or_404(NobarSpot,pk=id)
     context={
