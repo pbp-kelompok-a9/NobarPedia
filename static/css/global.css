@@ -61,13 +61,14 @@ h5 {
     line-height: normal;
 }
 
-.body {
+html body {
     color: #FFF;
     font-family: Poppins;
     font-size: 18px;
     font-style: normal;
     font-weight: 400;
     line-height: normal;
+    background-color: #1e1e1e;
 }
 
 .footnote {
