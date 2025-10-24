@@ -22,9 +22,9 @@
         
         <!-- Desktop User Section -->
         <div class="hidden md:flex items-center space-x-6">
-          {% if user.is_authenticated %}
-            <a href="/account/view_profile/{{ user.id }}" class="text-right">
-              <div class="text-sm font-medium text-white hover:text-gray-400">{{ name|default:user.username }}</div>
+          {% if request.user.is_authenticated %}
+            <a href="/account/view_profile/{{ request.user.id }}" class="text-right">
+              <div class="text-sm font-medium text-white hover:text-gray-400">{{ name|default:request.user.username }}</div>
             </a>
             <a href="{% url 'account:logout' %}" class="text-red-600 hover:text-red-700 font-medium transition-colors">
               Logout
@@ -70,9 +70,9 @@
         
         <!-- Mobile User Section -->
         <div class="border-t border-gray-700 pt-4">
-          {% if user.is_authenticated%}
+          {% if request.user.is_authenticated%}
             <a href="/account">
-              <div class="font-medium text-white hover:text-gray-400">{{ name|default:user.username }}</div>
+              <div class="font-medium text-white hover:text-gray-400">{{ name|default:request.user.username }}</div>
             </a>
             {% comment %} href {% url 'account:logout' %} belum jadi {% endcomment %}
             <a href="" class="block text-red-600 hover:text-red-700 font-medium transition-colors pt-4">
