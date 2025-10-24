@@ -35,7 +35,7 @@ DEBUG = True
 ALLOWED_HOSTS = ["localhost", "127.0.0.1", "daffa-ismail-nobarpedia.pbp.cs.ui.ac.id"]
 
 CSRF_TRUSTED_ORIGINS = [
-    "https://daffa-ismail-nobarpedia.pbp.cs.ui.ac.id/"
+    "https://daffa-ismail-nobarpedia.pbp.cs.ui.ac.id"
 ]
 
 # Untuk access profile picture user
