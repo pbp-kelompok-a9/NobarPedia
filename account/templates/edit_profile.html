@@ -9,7 +9,7 @@
 
 {% include 'delete_modal.html' %}
 
-{% if not user.is_staff %}
+{% if not perms.auth.view_user %}
 {% include 'navbar.html' %}
 {% else %}
 {% include 'navbar-admin.html' %}

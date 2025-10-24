@@ -64,7 +64,7 @@
                         <img src="{% static 'image/no-profile-picture.svg' %}" alt="No Profile Picture"
                             class="w-[50px] h-[50px] rounded-full border-2 border-green-600 object-cover">
                     {% endif %}
-                    <span class="font-medium text-lg">{{ user.username }} {% if user.is_staff %}(Admin){% endif %}</span>
+                    <span class="font-medium text-lg">{{ user.username }} {% if perms.auth.view_user %}(Admin){% endif %}</span>
                 </div>
                 <div class="flex items-center gap-4">
                     <a href="{% url 'account:admin_edit_profile' user.id %}" class="btn-edit">

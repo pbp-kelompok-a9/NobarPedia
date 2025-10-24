@@ -6,15 +6,11 @@ from django.contrib.auth.models import User
 
 from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
 from django.contrib import messages
-from django.views.decorators.csrf import csrf_exempt
-from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
+from django.contrib.auth import login, logout, update_session_auth_hash
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from django.core import serializers
-import datetime
 from django.urls import reverse
-from django.views.decorators.http import require_http_methods
-from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.decorators import permission_required
 
 def login_user(request):
     if request.method == 'POST':
@@ -22,7 +18,8 @@ def login_user(request):
         if form.is_valid():
             user = form.get_user()
             login(request, user)
-            if not user.is_staff:                
+            # cek apakah user adalah admin menggunakan permission
+            if not user.has_perm('auth.view_user'):                
                 response = HttpResponseRedirect(reverse("homepage:show_homepage"))
             else:
                 response = HttpResponseRedirect(reverse("account:account_admin_dashboard"))
@@ -93,11 +90,11 @@ def edit_profile(request, id):
 # @csrf_exempt
 def delete_profile(request, id):
     # Hanya dirinya sendiri atau ADMIN yg boleh delete
-    if not request.user.is_staff and request.user.id != id:
+    if not request.user.has_perm('auth.delete_user') and request.user.id != id:
         return HttpResponseRedirect(reverse('homepage:show_homepage'))
 
     user_to_delete = get_object_or_404(User, pk=id)
-    is_admin = request.user.is_staff
+    is_admin = request.user.has_perm('auth.delete_user')
 
     user_to_delete.delete()
 
@@ -143,7 +140,7 @@ def show_user(request):
 
 @login_required(login_url='/account/login')
 def account_admin_dashboard(request):
-    if not request.user.is_staff:
+    if not request.user.has_perm('auth.view_user'):
         return HttpResponseRedirect(reverse('homepage:show_homepage'))
         
     users = User.objects.all()
@@ -152,7 +149,7 @@ def account_admin_dashboard(request):
 
 @login_required(login_url='/account/login')
 def admin_edit_profile(request, id):
-    if not request.user.is_staff:
+    if not request.user.has_perm('auth.change_user'):
         return HttpResponseRedirect(reverse('homepage:show_homepage'))
 
     user_to_edit = get_object_or_404(User, pk=id)
