@@ -11,7 +11,7 @@ def show_join(request):
     return render(request, "join.html")
 
 # done just attach user and nobar_place into the request
-def post_join(request):
+def post_join(request, nobar_place_id):
     form = JoinForm(request.POST or None)
 
     if form.is_valid() and request.method == 'POST':
@@ -22,13 +22,8 @@ def post_join(request):
         else:
             join_entry.user = None
 
-        nobar_place_id = request.POST.get('nobar_place')
-        if nobar_place_id:
-            try:
-                nobar_place = NobarSpot.objects.get(id=nobar_place_id)
-                join_entry.nobar_place = nobar_place
-            except NobarSpot.DoesNotExist:
-                join_entry.nobar_place = None
+        nobar_place = get_object_or_404(NobarSpot, id=nobar_place_id)
+        join_entry.nobar_place = nobar_place
 
         join_entry.save()
         return redirect('join:show_join')
@@ -41,11 +36,13 @@ def get_join(request):
     data = [
         {
             'id': str(join_record.id),
-            'user_id': join_record.user_id,
+            'user': join_record.user.username if join_record.user else None,
+            'user_id': str(join_record.user.id) if join_record.user else None,
             'nobar_place_id': join_record.nobar_place_id,
-            'nobar_place_name': join_record.nobar_place.name,
-            'nobar_place_city': join_record.nobar_place.city,
-            'nobar_place_time': join_record.nobar_place.time.strftime('%H:%M'),
+            'nobar_place_name': join_record.nobar_place.name if join_record.nobar_place else None,
+            'nobar_place_city': join_record.nobar_place.city if join_record.nobar_place else None,
+            'nobar_place_time': join_record.nobar_place.time.strftime('%H:%M') if join_record.nobar_place and join_record.nobar_place.time
+    else None,
             'status': join_record.status,
             'created_at': join_record.created_at.isoformat() if join_record.created_at else None,
         }
