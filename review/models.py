@@ -2,6 +2,7 @@ from django.db import models
 import uuid
 from django.contrib.auth.models import User
 #from... import NobarSpot
+#from... import Account
 # Create your models here.
 
 #Placeholder
@@ -16,8 +17,7 @@ class NobarSpot(models.Model):
     
 class reviewers(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
     comment = models.TextField()
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     stars = models.SmallIntegerField()
-    nobar_spot = models.ForeignKey(NobarSpot, on_delete=models.CASCADE, null = True )

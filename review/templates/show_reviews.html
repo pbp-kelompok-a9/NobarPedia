@@ -1,0 +1,28 @@
+{%extends 'base.html'%}
+{%load static%}
+{%block content%}
+<div class = "bg-black w-full pt-16 min-h-screen">
+    <div class = "max-w-7x1 mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!--Nobar Spot Display Section-->
+        <div>
+            <div class="block text-white text-align:center">
+                <img width="600" height="300" style="float:left"/>
+                <div class="block text-blue text-align:center font-size=70px">
+                    <h1 style="">NAMA TEM</h1>
+                </div>
+            </div>
+            
+        </div>
+        <!--Review Flexbox-->
+        {% if not review_list%}
+        <div>
+
+        </div>
+        {%else%}
+        <div class="grid grid-auto-flow:column grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-2">
+            
+        </div>
+        {%endif%}
+    </div>
+</div>
+{%endblock content%}
