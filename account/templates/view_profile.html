@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block meta %}
+<title>View Profile - NobarPedia</title>
+{% endblock meta %}
+
+{% block content %}
+
+{% if not perms.auth.view_user %}
+{% include 'navbar.html' %}
+{% else %}
+{% include 'navbar-admin.html' %}
+{% endif %}
+
+<style>
+.join-us {
+    font-family: "Poppins", sans-serif;
+    font-size: 36px;
+    font-weight: 600;
+    color: white;
+}
+
+.input-bar {
+    border-radius: 8px;
+    border: 1px solid var(--Neutral-700, #666);
+    background: var(--Neutral-900, #333);
+    color: white;
+    padding: 10px 14px;
+}
+
+.input-bar:disabled {
+    opacity: 0.8;
+    cursor: not-allowed;
+}
+
+.btn-edit {
+    margin-top: 24px;
+    border-radius: 8px;
+    border: 1px solid #6ADE7F;
+    background: #2CAC5C;
+    color: white;
+    padding: 10px 28px;
+    transition: background 0.2s ease;
+}
+
+.btn-edit:hover {
+    background: #23994E;
+}
+</style>
+
+<div class="min-h-screen bg-[#1E1E1E] flex flex-col items-center justify-center pt-[100px]">
+    <div class="bg-[#333] w-full max-w-[600px] rounded-[12px] px-10 py-8 shadow-sm">
+        <div class="text-center mb-8">
+            {% if user.profile.profile_picture %}
+                <img src="{{ user.profile.profile_picture.url }}" alt="Profile Picture"
+                    class="w-32 h-32 mx-auto rounded-full border-4 border-green-600 object-cover mb-4">
+            {% else %}
+                <img src="{% static 'image/no-profile-picture.svg' %}" alt="No Profile Picture"
+                    class="w-32 h-32 mx-auto rounded-full border-4 border-green-600 object-cover mb-4">
+            {% endif %}
+            <h4 class="join-us"> {{ user.profile.fullname }} </h4>
+        </div>
+
+        <form class="space-y-6">
+            <div>
+                <label for="username" class="block body mb-2 text-white">Username</label>
+                <input id="username" name="username" type="text"
+                    class="w-full input-bar focus:outline-none transition duration-200"
+                    value="{{ user.username }}" disabled>
+            </div>
+
+            <div>
+                <label for="email" class="block body mb-2 text-white">Email</label>
+                <input id="email" name="email" type="text"
+                    class="w-full input-bar focus:outline-none transition duration-200"
+                    value="{{ user.email }}" disabled>
+            </div>
+
+            <div>
+                <label for="fullname" class="block body mb-2 text-white">Fullname</label>
+                <input id="fullname" name="fullname" type="text"
+                    class="w-full input-bar focus:outline-none transition duration-200"
+                    value="{{ user.profile.fullname }}" disabled>
+            </div>
+
+            <div>
+                <label for="bio" class="block body mb-2 text-white">Bio</label>
+                <textarea id="bio" name="bio" rows="3"
+                    class="w-full input-bar focus:outline-none transition duration-200 resize-none"
+                    disabled>{{ user.profile.bio }}</textarea>
+            </div>
+
+            <button id="editButton" class="hidden btn-edit w-full">
+                Edit Profile
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+const user_id = {{ user.id }};
+const showUpdateButton = "{{ show_update_button }}";
+const editButton = document.getElementById('editButton');
+
+setTimeout(() => {
+    //console.log("a")
+    if (showUpdateButton === "True") {
+        //console.log("geez")
+        editButton.classList.remove('hidden');    
+    }
+}, 100);
+
+
+editButton.addEventListener('click', () => {
+    // console.log('oke kita redirect ya')
+    const url_address = "{% url 'account:edit_profile' 0 %}".replace('0', user_id);
+    setTimeout(() => {
+        window.location.href = url_address;
+    }, 20);
+});
+
+</script>
+{% endblock %}

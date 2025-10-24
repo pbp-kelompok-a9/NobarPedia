@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block meta %}
+<title>Admin Edit Profile</title>
+{% endblock meta %}
+
+{% block content %}
+{% include 'navbar-admin.html' %} 
+<style>
+.input-bar {
+    border-radius: 8px;
+    border: 1px solid var(--Neutral-700, #666);
+    background: var(--Neutral-900, #333);
+    color: white;
+    padding: 10px 14px;
+    width: 100%;
+}
+.input-bar:focus {
+    outline: none;
+    border-color: #2CAC5C;
+}
+.btn-save {
+    border-radius: 8px;
+    border: 1px solid #6ADE7F;
+    background: #2CAC5C;
+    color: white;
+    padding: 10px 28px;
+    transition: background 0.2s ease;
+}
+.btn-save:hover {
+    background: #23994E;
+}
+.btn-cancel {
+    border-radius: 8px;
+    border: 1px solid #666;
+    background: #333;
+    color: #ccc;
+    padding: 10px 28px;
+    transition: background 0.2s ease;
+}
+.btn-cancel:hover {
+    background: #444;
+}
+</style>
+
+<div class="min-h-screen bg-[#1E1E1E] flex flex-col items-center justify-center pt-[100px] pb-10">
+    <div class="bg-[#333] w-full max-w-[600px] rounded-[12px] px-10 py-8 shadow-sm">
+        <div class="mb-8">
+            <h1 class="text-2xl font-bold text-white mb-2">Edit Profile: {{ user_to_edit.username }}</h1>
+            <p class="text-gray-400">You are editing as an Admin.</p>
+        </div>
+
+        {% if user_to_edit.profile.profile_picture %}
+            <img src="{{ user_to_edit.profile.profile_picture.url }}" alt="Profile Picture"
+                class="w-32 h-32 mx-auto rounded-full border-4 border-green-600 object-cover mb-4">
+        {% else %}
+            <img src="{% static 'image/no-profile-picture.svg' %}" alt="No Profile Picture"
+                class="w-32 h-32 mx-auto rounded-full border-4 border-green-600 object-cover mb-4">
+        {% endif %}
+
+        {% if form.errors %}
+        <div class="mb-6 space-y-2">
+          {% for field, errors in form.errors.items %}
+            {% for error in errors %}
+              <div class="text-sm text-red-300">
+                <strong>{{ field|title }}:</strong> {{ error }}
+              </div>
+            {% endfor %}
+          {% endfor %}
+        </div>
+        {% endif %}
+
+        <form method="POST" enctype="multipart/form-data" class="space-y-6">
+            {% csrf_token %}
+            
+            <div>
+                <label for="username" class="block body mb-2 text-white">Username</label>
+                <input id="username" name="username" type="text"
+                    class="w-full input-bar"
+                    value="{{ form.username.value|default:'' }}">
+            </div>
+
+            <div>
+                <label for="email" class="block body mb-2 text-white">Email</label>
+                <input id="email" name="email" type="email"
+                    class="w-full input-bar"
+                    value="{{ form.email.value|default:'' }}">
+            </div>
+
+            <div>
+                <label for="fullname" class="block body mb-2 text-white">Fullname</label>
+                <input id="fullname" name="fullname" type="text"
+                    class="w-full input-bar"
+                    value="{{ form.fullname.value|default:'' }}">
+            </div>
+
+            <div>
+                <label for="bio" class="block body mb-2 text-white">Bio</label>
+                <textarea id="bio" name="bio" rows="3"
+                    class="w-full input-bar resize-none">{{ form.bio.value|default:'' }}</textarea>
+            </div>
+            
+            <div>
+                <label for="profile_picture" class="block body mb-2 text-white">Profile Picture</label>
+                {% if form.profile_picture.value %}
+                <p class="text-sm text-gray-400 mb-2">Current: <a href="{{ form.profile_picture.value.url }}" class="text-green-400" target="_blank">{{ form.profile_picture.value.name }}</a></p>
+                {% endif %}
+                <input id="profile_picture" name="profile_picture" type="file" accept="image/*"
+                    class="w-full text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-green-600 file:text-white hover:file:bg-green-700">
+            </div>
+            
+            <div>
+                <label for="password" class="block body mb-2 text-white">New Password</label>
+                <input id="password" name="password" type="password"
+                    class="w-full input-bar"
+                    placeholder="Leave blank to keep password unchanged">
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-4 pt-6 border-t border-gray-600">
+                <a href="{% url 'account:account_admin_dashboard' %}" 
+                   class="order-2 sm:order-1 btn-cancel text-center">
+                    Cancel
+                </a>
+                <button type="submit" 
+                        class="order-1 sm:order-2 flex-1 btn-save">
+                    Update Profile
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

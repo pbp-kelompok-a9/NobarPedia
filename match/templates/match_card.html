@@ -1,0 +1,31 @@
+<div class="bg-stone-800 rounded-lg p-2">
+    <div class="flex justify-between w-full">
+        <h3 class="text-lg font-medium text-white mb-2"> {{ match.competition.name }} </h3>
+        <p class="text-sm font-small text-white">{{ match.begin_date }} - {{ match.end_date }}</p>
+    </div>
+    <div class="grid grid-cols-5 w-full items-center">
+        <div class="col-span-2 w-full justify-center text-center text-white">
+            <a href="" class="text-white transition-all hover:text-green-600">
+                {% if match.players.0.logo %}
+                    <img width="400"
+                         height="400"
+                         src="{{ match.players.0.logo }}">
+                {% endif %}
+                {{ match.players.0.name }}
+            </a>
+        </div>
+        <h3 class="select-none text-center text-white text-3xl font-medium">vs</h3>
+        <div class="col-span-2 w-full justify-center text-center text-white">
+            <a href="" class="text-white transition-all hover:text-green-600">
+                {% if match.players.1.logo %}
+                    <img width="400"
+                         height="400"
+                         src="{{ match.players.1.logo }}">
+                {% endif %}
+                {{ match.players.1.name }}
+            </a>
+        </div>
+    </div>
+    <a href=""
+       class="inline-block text-white text-center transition-all hover:text-green-600 w-full">Find Showing Places</a>
+</div>
