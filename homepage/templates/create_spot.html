@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% block meta %}
+<title>Add Product - Flex Kick</title>
+{% endblock meta %}
+
+{% block content %}
+<div class="bg-[#1E1E1E] w-full min-h-screen">
+  <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    
+    <!-- Back Navigation -->
+    <div class="mb-6">
+      <a href="{% url 'homepage:show_homepage' %}" class="text-gray-300 hover:text-white font-medium transition-colors">
+        ← Back to Product
+      </a>
+    </div>
+    
+    <!-- Form -->
+    <div class="bg-[#333333] rounded-lg border border-gray-500 p-6 sm:p-8 form-style">
+      <div class="mb-8">
+        <h1 class="text-2xl tracking-wide text-white mb-2 text-center">Add New Spot</h1>
+      </div>
+      
+      <form method="POST" class="space-y-6">
+        {% csrf_token %}
+        {% for field in form %}
+          <div>
+            <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-white mb-2">
+              {{ field.label }}
+            </label>
+            <div class="w-full">
+              {{ field }}
+            </div>
+            {% if field.help_text %}
+              <p class="mt-1 text-sm text-gray-500">{{ field.help_text }}</p>
+            {% endif %}
+            {% for error in field.errors %}
+              <p class="mt-1 text-sm text-red-600">{{ error }}</p>
+            {% endfor %}
+          </div>
+        {% endfor %}
+        
+        <div class="flex flex-col sm:flex-row gap-4 pt-6 border-t border-gray-200">
+          <a href="{% url 'homepage:show_homepage' %}" class="order-2 sm:order-1 px-6 py-3 border border-gray-300 text-white rounded-md font-medium hover:bg-gray-50 hover:text-gray-800 transition-colors text-center">
+            Cancel
+          </a>
+          <button type="submit" class="order-1 sm:order-2 flex-1 bg-green-600 text-white px-6 py-3 rounded-md font-medium hover:bg-green-800 transition-colors">
+            Publish Spot
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
