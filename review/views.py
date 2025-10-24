@@ -13,6 +13,7 @@ def show_reviews(request, id):
     review_list = reviewers.objects.filter(nobar_spot=get_nobar_spot)
     context = {
         'review_list':review_list,
+        'nobar_spot':get_nobar_spot
     }
     return render(request, "show_reviews.html", context)
 
