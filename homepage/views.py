@@ -3,6 +3,7 @@ from homepage.forms import NobarSpotForm
 from homepage.models import NobarSpot
 from django.http import HttpResponseRedirect, JsonResponse
 from django.urls import reverse
+from django.contrib.auth.decorators import login_required
 
 # Create your views here.
 def show_homepage(request):
@@ -13,6 +14,7 @@ def show_homepage(request):
     }
     return render(request, "homepage.html",context)
 
+@login_required(login_url='/account/login')
 def create_spot(request):
     form = NobarSpotForm(request.POST or None)
 
@@ -23,7 +25,7 @@ def create_spot(request):
     context = {'form':form}
     return render(request, "create_spot.html", context)
 
-
+@login_required(login_url='/account/login')
 def edit_spot(request, id):
     nobarSpot = get_object_or_404(NobarSpot, pk=id)
     form = NobarSpotForm(request.POST or None, instance=nobarSpot)
@@ -45,6 +47,7 @@ def show_spot(request):
     }
     return render(request, "spot_detail.html",context)
 
+@login_required(login_url='/account/login')
 def delete_spot(request,id):
     nobarSpot = get_object_or_404(NobarSpot,pk=id)
     nobarSpot.delete()
