@@ -13,4 +13,6 @@ urlpatterns = [
     path('edit_profile/<int:id>', views.edit_profile, name='edit_profile'),
     path('change_password/<int:id>', views.change_password, name='change_password'),
     path('delete_profile/<int:id>', views.delete_profile, name='delete_profile'),
+    path('admin', views.account_admin_dashboard, name='account_admin_dashboard'),
+    path('admin/edit_profile/<int:id>', views.admin_edit_profile, name='admin_edit_profile'),
 ]

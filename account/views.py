@@ -1,5 +1,5 @@
 from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm
-from account.forms import CustomUserCreationForm, CustomUserEditForm
+from account.forms import AdminUserEditForm, CustomUserCreationForm, CustomUserEditForm
 
 from account.models import Profile
 from django.contrib.auth.models import User
@@ -22,7 +22,10 @@ def login_user(request):
         if form.is_valid():
             user = form.get_user()
             login(request, user)
-            response = HttpResponseRedirect(reverse("homepage:show_homepage"))
+            if not user.is_staff:                
+                response = HttpResponseRedirect(reverse("homepage:show_homepage"))
+            else:
+                response = HttpResponseRedirect(reverse("account:account_admin_dashboard"))
             # response.set_cookie('last_login', str(datetime.datetime.now()))
             return response
     else:
@@ -83,11 +86,23 @@ def edit_profile(request, id):
     return render(request, "edit_profile.html", context)
   
 @login_required(login_url='/account/login')
-@csrf_exempt
+# @csrf_exempt
 def delete_profile(request, id):
-  user = get_object_or_404(User, pk=id)
-  user.delete()
-  return HttpResponseRedirect(reverse('account:login'))
+    # Hanya dirinya sendiri atau ADMIN yg boleh delete
+    if not request.user.is_staff and request.user.id != id:
+        return HttpResponseRedirect(reverse('homepage:show_homepage'))
+
+    user_to_delete = get_object_or_404(User, pk=id)
+    is_admin = request.user.is_staff
+
+    user_to_delete.delete()
+
+    if is_admin:
+        # Kalo admin yang delete, balik ke dashboard admin
+        return HttpResponseRedirect(reverse('account:account_admin_dashboard'))
+    else:
+        # Kalo dirinya sendiri yg delete, arahkan ke login
+        return HttpResponseRedirect(reverse('account:login'))
 
 # @login_required(login_url='/account/login')
 # def delete_profile_from_admin(request, id):
@@ -121,3 +136,31 @@ def change_password(request, id):
 @login_required(login_url='/account/login')
 def show_user(request):
     return JsonResponse(data=[{'msg':'this is user page'}], safe=False)
+
+@login_required(login_url='/account/login')
+def account_admin_dashboard(request):
+    if not request.user.is_staff:
+        return HttpResponseRedirect(reverse('homepage:show_homepage'))
+        
+    users = User.objects.all()
+    context = {'users': users}
+    return render(request, "account_admin_dashboard.html", context)
+
+@login_required(login_url='/account/login')
+def admin_edit_profile(request, id):
+    if not request.user.is_staff:
+        return HttpResponseRedirect(reverse('homepage:show_homepage'))
+
+    user_to_edit = get_object_or_404(User, pk=id)
+    
+    if request.method == 'POST':
+        form = AdminUserEditForm(request.POST, request.FILES, instance=user_to_edit)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'User profile updated successfully!')
+            return redirect('account:account_admin_dashboard')
+    else:
+        form = AdminUserEditForm(instance=user_to_edit)
+
+    context = {'form': form, 'user_to_edit': user_to_edit}
+    return render(request, "admin_edit_profile.html", context)

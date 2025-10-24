@@ -84,10 +84,12 @@ function hideDeleteModal() {
 async function handleDelete() {
   const response = await fetch(`/account/delete_profile/${currentUserId}`, {
     method: 'POST',
+    headers: { "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value }
   });
 
   hideDeleteModal();
   // document.dispatchEvent(new CustomEvent("productDeleted"));
   // showToast("Product deleted successfully!", '', 'deleted');
+  window.location.href = response.url;
 }
 </script>

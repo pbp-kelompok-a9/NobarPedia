@@ -62,13 +62,14 @@ class CustomUserEditForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(CustomUserEditForm, self).__init__(*args, **kwargs)
-        # Isi field dari model Profile jika ada
-        if self.instance and hasattr(self.instance, 'profile'):
+        # Isi field dari model Profile jika ada          
+        if self.instance:
             self.fields['username'].initial = self.instance.username
-            self.fields['email'].initial = self.instance.email
-            self.fields['fullname'].initial = self.instance.profile.fullname
-            self.fields['bio'].initial = self.instance.profile.bio
-            self.fields['profile_picture'].initial = self.instance.profile.profile_picture
+            if hasattr(self.instance, 'profile'):
+                self.fields['email'].initial = self.instance.email
+                self.fields['fullname'].initial = self.instance.profile.fullname
+                self.fields['bio'].initial = self.instance.profile.bio
+                self.fields['profile_picture'].initial = self.instance.profile.profile_picture
 
     def save(self, commit=True):
         user = super(CustomUserEditForm, self).save(commit=False)
@@ -82,4 +83,53 @@ class CustomUserEditForm(forms.ModelForm):
             if pic is not None:
                 profile.profile_picture = pic
             profile.save()
+        return user
+    
+    
+    
+class AdminUserEditForm(forms.ModelForm):
+    email = forms.EmailField(required=False)
+    fullname = forms.CharField(max_length=100, required=False)
+    bio = forms.CharField(widget=forms.Textarea, required=False)
+    profile_picture = forms.ImageField(required=False)
+    
+    # field password (admin bisa ubah password langsung)
+    password = forms.CharField(widget=forms.PasswordInput, required=False, help_text="Leave blank to keep the current password.")
+
+    class Meta:
+        model = User
+        fields = ['username', 'email', 'fullname', 'bio', 'profile_picture', 'password']
+
+    def __init__(self, *args, **kwargs):
+        super(AdminUserEditForm, self).__init__(*args, **kwargs)
+        if self.instance:
+            self.fields['username'].initial = self.instance.username
+            if hasattr(self.instance, 'profile'):
+                self.fields['email'].initial = self.instance.email
+                self.fields['fullname'].initial = self.instance.profile.fullname
+                self.fields['bio'].initial = self.instance.profile.bio
+                self.fields['profile_picture'].initial = self.instance.profile.profile_picture
+        
+        # Make password field not show existing hash
+        self.fields['password'].initial = ''
+
+    def save(self, commit=True):
+        user = super(AdminUserEditForm, self).save(commit=False)
+        
+        user.email = self.cleaned_data.get('email')
+        password = self.cleaned_data.get('password')
+        if password:
+            user.set_password(password)
+
+        if commit:
+            user.save()
+            profile, _ = Profile.objects.get_or_create(user=user)
+            profile.fullname = self.cleaned_data.get('fullname', '')
+            profile.bio = self.cleaned_data.get('bio', '')
+            pic = self.cleaned_data.get('profile_picture')
+            # Only set profile_picture if present in cleaned_data
+            if pic is not None:
+                profile.profile_picture = pic
+            profile.save()
+            
         return user
