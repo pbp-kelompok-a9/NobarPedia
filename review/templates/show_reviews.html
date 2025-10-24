@@ -7,11 +7,14 @@
         <div>
             <div class="block text-white text-align:center">
                 <img src="{{ nobar_spot.thumbnail }}" width="600" height="300" style="float:left"/>
-                <div class="block text-blue text-align:center font-size=70px">
+                <div class="block text-blue text-center font-size=70px space-y-4">
                     <h1 style="">{{nobar_spot.name}}</h1>
-                    {{nobar_spot.home_team}} vs {{nobar_spot.home_team}}
-                    <a href="{% url 'join:post_join' nobar_spot.id %}">  Join </a>
+                    <p class="text-green-500">{{nobar_spot.home_team}} vs {{nobar_spot.away_team}}</p>
+                    <p>{{nobar_spot.address}}</p>
+                    <p>{{nobar_spot.city}}</p>
+                    <a href="{% url 'join:post_join' nobar_spot.id %}" class="px-32 rounded bg-green-500 py-2 mt-8">  Join </a>    
                 </div>
+                
             </div>
             
         </div>
