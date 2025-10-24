@@ -78,10 +78,14 @@ def edit_profile(request, id):
         # print('ga boleh edit punya orang  lain bro', request.user.id, " ", id)
         return HttpResponseRedirect(reverse('homepage:show_homepage'))
     user = get_object_or_404(User, pk=id)
-    form = CustomUserEditForm(request.POST or None, instance=user)
-    if form.is_valid() and request.method == 'POST':
-        form.save()
-        return redirect('account:view_profile', id=id)
+    if request.method == 'POST':
+        form = CustomUserEditForm(request.POST, request.FILES, instance=user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'User profile updated successfully!')
+            return redirect('account:view_profile', id=id)
+    else:
+        form = CustomUserEditForm(instance=user)
     context = {'form': form }
     return render(request, "edit_profile.html", context)
   

@@ -6,7 +6,12 @@
 {% endblock meta %}
 
 {% block content %}
+
+{% if not user.is_staff %}
 {% include 'navbar.html' %}
+{% else %}
+{% include 'navbar-admin.html' %}
+{% endif %}
 
 <style>
 .join-us {

@@ -126,8 +126,8 @@ class AdminUserEditForm(forms.ModelForm):
             profile, _ = Profile.objects.get_or_create(user=user)
             profile.fullname = self.cleaned_data.get('fullname', '')
             profile.bio = self.cleaned_data.get('bio', '')
-            pic = self.cleaned_data.get('profile_picture')
             # Only set profile_picture if present in cleaned_data
+            pic = self.cleaned_data.get('profile_picture')
             if pic is not None:
                 profile.profile_picture = pic
             profile.save()
