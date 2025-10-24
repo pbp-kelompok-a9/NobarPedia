@@ -90,10 +90,10 @@
 
     <!-- Tombol tengah -->
     <div class="flex gap-4">
-      <button class="bg-green-600 hover:bg-green-700 text-white font-medium px-5 py-2 rounded-md transition">
+      <button id="filter-all"class="bg-green-600 hover:bg-green-700 text-white font-medium px-5 py-2 rounded-md transition">
         All Spot
       </button>
-      <button class="border border-green-600 text-white font-medium px-5 py-2 rounded-md hover:bg-green-600 transition">
+      <button id="filter-my"class="border border-green-600 text-white font-medium px-5 py-2 rounded-md hover:bg-green-600 transition">
         Your Spot
       </button>
     </div>
@@ -162,10 +162,8 @@ const yourBtn = document.getElementById('filter-my');
 let allSpots = [];
 let activeFilter = 'all';
 
-// Update filter button appearance
 function updateFilterButtonsAppearance() {
   if (!allBtn || !yourBtn) return;
-  
   if (activeFilter === 'all') {
     allBtn.className = 'flex-1 bg-green-600 hover:bg-green-700 text-white font-medium px-5 py-2 rounded-md transition';
     yourBtn.className = 'flex-1 border border-green-600 text-white font-medium px-5 py-2 rounded-md hover:bg-green-600 transition';
@@ -175,7 +173,6 @@ function updateFilterButtonsAppearance() {
   }
 }
 
-// Toggle visibility
 function showSection({ loading: showLoading=false, error: showError=false, empty: showEmpty=false, grid: showGrid=false }) {
   loading.classList.toggle('hidden', !showLoading);
   error.classList.toggle('hidden', !showError);
@@ -183,7 +180,13 @@ function showSection({ loading: showLoading=false, error: showError=false, empty
   grid.classList.toggle('hidden', !showGrid);
 }
 
-// Build one card
+function safeFormatDate(dateStr) {
+  if (!dateStr) return '';
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return dateStr;
+  return d.toLocaleDateString('en-US', { month:'short', day:'2-digit' });
+}
+
 function buildSpotCard(spot) {
     const div = document.createElement('div');
     div.className = "bg-white rounded-xl shadow hover:shadow-lg transition overflow-hidden text-gray-900 flex flex-col";
@@ -195,7 +198,7 @@ function buildSpotCard(spot) {
     const formattedTime = spot.time ? spot.time.split(':').slice(0, 2).join(':') : '';
 
     let editdeleteButtons = '';
-    if (CURRENT_USER_ID && Number(CURRENT_USER_ID) === Number(spot.host_id)){
+    if (CURRENT_USER_ID && String(CURRENT_USER_ID) !== '' && String(spot.host_id) !== '' && String(CURRENT_USER_ID) === String(spot.host_id)) {
       editdeleteButtons =  `
       <div class="flex gap-2 ml-3">
         <a href="${linkEdit}" class="text-green-600 hover:text-green-700 text-sm font-medium py-2 px-1">Edit</a>
@@ -215,14 +218,14 @@ function buildSpotCard(spot) {
 
         <div class="p-4 flex flex-col flex-1">
             <div class="mb-3">
-                <span class="bg-white text-[#2CAC5C] text-sm font-medium me-2 px-2.5 py-0.5 rounded-full border border-[#2CAC5C]">${spot.home_team} vs ${spot.away_team}</span>
+                <span class="bg-white text-[#2CAC5C] text-sm font-medium me-2 px-2.5 py-0.5 rounded-full border border-[#2CAC5C]">${spot.home_team || ''} vs ${spot.away_team || ''}</span>
             </div>
 
             <div class="flex justify-between items-start mb-2">
-                <h3 class=" headline text-lg leading-tight flex-1 text-black truncate">${spot.name}</h3>
-                <p class="footnote text-xs text-gray-500 whitespace-nowrap ml-4">${new Date(spot.date).toLocaleDateString('en-US', { month:'short',day:'2-digit' })} | ${formattedTime}</p>
+                <h3 class=" headline text-lg leading-tight flex-1 text-black truncate">${spot.name || ''}</h3>
+                <p class="footnote text-xs text-gray-500 whitespace-nowrap ml-4">${safeFormatDate(spot.date)}${formattedTime ? ' | ' + formattedTime : ''}</p>
             </div>
-            <p class="footnote text-sm text-gray-500 mb-4">${spot.city}</p>
+            <p class="footnote text-sm text-gray-500 mb-4">${spot.city || ''}</p>
             
             <div class="mt-auto flex items-center pt-2">
                <a href="${linkDetail}" class="flex-1 bg-green-600 hover:bg-green-700 text-white text-base font-medium px-4 py-2 rounded-md text-center">Detail</a>
@@ -234,19 +237,20 @@ function buildSpotCard(spot) {
     return div;
 }
 
-// Render grid
 function renderSpots(spots) {
   grid.innerHTML = '';
   spots.forEach(s => grid.appendChild(buildSpotCard(s)));
 }
 
-// Filter
 function filterSpots() {
   updateFilterButtonsAppearance();
 
   const filtered = activeFilter === 'all'
     ? allSpots
-    : allSpots.filter(s => Number(s.host_id) === Number(CURRENT_USER_ID));
+    : allSpots.filter(s => {
+        if (!CURRENT_USER_ID || CURRENT_USER_ID === '') return false;
+        return String(s.host_id) === String(CURRENT_USER_ID);
+      });
 
   if (filtered.length === 0) {
     showSection({ empty: true });
@@ -256,21 +260,36 @@ function filterSpots() {
   }
 }
 
-// Fetch
 async function fetchSpots() {
   try {
     showSection({ loading: true });
     const res = await fetch(SPOT_API);
     if (!res.ok) throw new Error("Failed to fetch");
     const data = await res.json();
-    allSpots = data;
+
+    allSpots = (Array.isArray(data) ? data : []).map(item => {
+      const fields = item.fields || item;
+      return {
+        id: item.pk || item.id || fields.id || '',
+        name: fields.name || fields.title || '',
+        thumbnail: fields.thumbnail || fields.image || '',
+        home_team: fields.home_team || fields.homeTeam || '',
+        away_team: fields.away_team || fields.awayTeam || '',
+        date: fields.date || '',
+        time: fields.time || fields.hour || '',
+        city: fields.city || '',
+        address: fields.address || '',
+        host_id: typeof fields.host !== 'undefined' ? fields.host : (fields.host_id || '')
+      };
+    });
+
     filterSpots();
   } catch (e) {
+    console.error(e);
     showSection({ error: true });
   }
 }
 
-// Buttons
 if (allBtn) {
   allBtn.addEventListener('click', (e) => {
     e.preventDefault();
@@ -287,9 +306,9 @@ if (yourBtn) {
   });
 }
 
-// Start
 document.addEventListener('DOMContentLoaded', fetchSpots);
 </script>
+
 
 
 {% endblock content %}

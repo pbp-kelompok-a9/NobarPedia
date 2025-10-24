@@ -121,9 +121,11 @@ html body {
     padding: 0.5rem;
     border: 2px solid #bcbcbc;
     border-radius: 0.375rem;
+    color: black;
 }
 .form-style form input:focus, form textarea:focus, form select:focus {
     outline: none;
     border-color: #16a34a;
     box-shadow: 0 0 0 3px #16a34a;
+    color: black;
 }
