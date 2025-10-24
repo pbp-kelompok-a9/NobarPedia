@@ -1,23 +1,58 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block meta %}
 <title>Login - NobarPedia</title>
 {% endblock meta %}
 
 {% block content %}
-<div class="bg-gray-50 w-full min-h-screen flex items-center justify-center p-8">
-  <div class="max-w-md w-full">
-    <div class="bg-white rounded-lg border border-gray-200 p-6 sm:p-8 form-style">
-      <div class="text-center mb-8">
-        <h1 class="text-2xl font-bold text-gray-900 mb-2">Log In</h1>
-        <p class="text-gray-600">Welcome back to NobarPedia</p>
-      </div>
+<style>
+.join-us {
+    font-family: "Poppins", sans-serif;
+    font-size: 40px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: normal;
+}
+
+.input-bar {
+    border-radius: 8px;
+    border: 1px solid var(--Neutral-700, #666);
+    background: var(--Neutral-900, #333);
+    color: white;
+}
+
+.btn-signin {
+    border-radius: 8px;
+    border: 1px solid #6ADE7F;
+    background: #2CAC5C;
+    color: white;
+    padding: 8px 28px;
+}
+</style>
+
+<div class="min-h-screen bg-[#1E1E1E] flex items-center justify-center p-8">
+    <div class="flex flex-col md:flex-row w-full relative z-10">
+        <!-- Section Kiri: Image -->
+        <div class="hidden md:flex w-1/2 flex-col justify-between items-center">
+            <!-- Blurry Rectangle -->
+            <div class="absolute bottom-10 left-0 w-full h-[300px] bg-[#0a463241]/50 blur-3xl -z-10"></div>
+            <!-- Image dan Headline -->
+            <img src="{% static 'image/register-frame.png' %}" class="max-w-[749px] w-full h-auto object-contain z-10"></img>
+            <h1 class="text-center text-[58px] z-10"> Lorem Ipsum Dolor Sit </h1>
+            <h2 class="text-center headline z-10 pb-10"> Lorem ipsum dolor sit amet, consectetur adipisc </h1>
+        </div>
+        <!-- Section Kanan: Form Register -->
+        <div class="bg-[#333] w-full md:w-1/2 rounded-[12px] px-16 py-6 shadow-sm">
+            <div class="text-center mb-8">
+                <h4 class="join-us">Sign In</h4>
+            </div>
 
       <!-- Form Errors Display -->
       {% if form.non_field_errors %}
         <div class="mb-6">
           {% for error in form.non_field_errors %}
-            <div class="px-4 py-3 rounded-md text-sm border bg-red-50 border-red-200 text-red-700">
+            <div class="text-sm text-red-200">
               {{ error }}
             </div>
           {% endfor %}
@@ -29,7 +64,7 @@
           {% for field, errors in form.errors.items %}
             {% if field != '__all__' %}
               {% for error in errors %}
-                <div class="px-4 py-3 rounded-md text-sm border bg-red-50 border-red-200 text-red-700 mb-2">
+                <div class="text-sm red text-red-200">
                   <strong>{{ field|title }}:</strong> {{ error }}
                 </div>
               {% endfor %}
@@ -42,31 +77,31 @@
         {% csrf_token %}
         
         <div>
-          <label for="username" class="block text-sm font-medium text-gray-700 mb-2">Username</label>
-          <input 
+            <label for="username" class="block body mb-4">Username</label>
+            <input 
             id="username" 
             name="username" 
             type="text" 
             required 
-            class="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:border-green-500 transition-colors" 
+            class="w-full px-4 py-3 input-bar focus:outline-none focus:border-green-500 transition duration-200" 
             placeholder="Enter your username">
         </div>
 
         <div>
-          <label for="password" class="block text-sm font-medium text-gray-700 mb-2">Password</label>
-          <input 
+            <label for="password1" class="block body mb-4">Password</label>
+            <input 
             id="password" 
             name="password" 
             type="password" 
             required 
-            class="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:border-green-500 transition-colors" 
+            class="w-full px-4 py-3 input-bar focus:outline-none focus:border-green-500 transition duration-200" 
             placeholder="Enter your password">
         </div>
 
         <button 
           type="submit" 
-          class="w-full bg-green-600 text-white font-medium py-3 px-4 rounded-md hover:bg-green-700 transition-colors">
-          Log In
+          class="w-full btn-signin headline font-medium rounded hover:bg-green-700 transition duration-200">
+          Sign In
         </button>
       </form>
 
@@ -76,13 +111,13 @@
           {% for message in messages %}
             <div 
               class="
-                px-4 py-3 rounded-md text-sm border
+                px-4 py-3  text-sm 
                 {% if message.tags == 'success' %}
-                  bg-green-50 border-green-200 text-green-700
+                  text-green-200
                 {% elif message.tags == 'error' %}
-                  bg-red-50 border-red-200 text-red-700
+                 text-red-200
                 {% else %}
-                  bg-gray-50 border-gray-200 text-gray-700
+                  text-gray-200
                 {% endif %}
               ">
               {{ message }}
@@ -91,14 +126,15 @@
         </div>
       {% endif %}
 
-      <div class="mt-6 text-center pt-6 border-t border-gray-200">
-        <p class="text-gray-500 text-sm">
-          Don't have an account? 
-          <a href="{% url 'account:register' %}" class="text-green-600 hover:text-green-700 font-medium">
-            Register Now
-          </a>
-        </p>
-      </div>
+        <div class="mt-16 text-center flex flex-col gap-1">
+            <p class="footnote">
+                Don't have an account? <a href="{% url 'account:register' %}" class="text-green-600 hover:text-green-700">Register Now</a>
+            </p>
+            <p class="footnote">Or</p>
+            <p class="footnote">
+                Continue as <a href="{% url 'homepage:show_homepage' %}" class="text-green-600 hover:text-green-700">Guest</a>
+            </p> 
+        </div>
     </div>
   </div>
 </div>
