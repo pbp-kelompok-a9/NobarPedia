@@ -1,9 +1,9 @@
 {% extends 'base.html' %}
 {% block content %}
-{% include 'navbar.html' %}
+{% comment %} {% include 'navbar.html' %} {% endcomment %}
 <div class=" text-white w-screen h-full pt-16 flex flex-col  items-center">
   
-  <div class="w-[80vw] aspect-[5/1] my-6 overflow-clip relative rounded flex">
+  <div class="w-[85vw] aspect-[5/1] my-6 overflow-clip relative rounded flex">
       <img src="https://image.idntimes.com/post/20250609/1000437318.jpg" class="absolute object-cover w-full h-full -z-10 opacity-50" alt="banner">
       <div class="w-1/2 p-4 self-end">
         <h1 class="text-2xl mb-2 text-4xl">Bring the <span class="text-green-500">Stadium</span> Closer to You</h1>
@@ -12,43 +12,163 @@
     </div>
   </div>
 
-  <div class="w-[80vw] flex text-center mx-auto bg-neutral-700 rounded text-sm py-1 mb-8">
-    <a id="filter-joined-spots" class="w-1/2">Joined Spot</a>
-    <a id="filter-my-spots" class="w-1/2">My Nobar Spot</a>
+  <div class="w-[85vw] flex text-center mx-auto bg-neutral-700 rounded text-sm mb-8">
+    <a id="filter_joined_spots" class="w-1/2 p-1">Joined Spot</a>
+    <a id="filter_my_spots" class="w-1/2 p-1">My Nobar Spot</a>
   </div>
 
-  <div class="w-[70vw] grid grid-cols-2 gap-8 mx-auto">
+  <div id="join_grid" class="w-[75vw] grid grid-cols-2 gap-8 mx-auto">
     
-    <div class="bg-neutral-700 w-full h-40 rounded p-2">
-      <div class="w-full flex justify-between">
+    {% comment %} <div class="bg-neutral-700 w-full rounded p-2 text-sm">
+      <div class="w-full flex justify-between items-center">
         <div>Nama Tempattttt</div>
-        <div>🕐 22.00 - 00.00</div>
+        <div class="text-xs">🕐 22.00 - 00.00</div>
       </div>
-      <div class="text-neutral-400 text-sm">Jakarta Timur</div>
-      <div></div>
-      <div></div>
-    </div>
-    <div class="bg-neutral-700 w-full h-40 rounded">
-
-    </div>
-    <div class="bg-neutral-700 w-full h-40 rounded">
-
-    </div>
-    <div class="bg-neutral-700 w-full h-40 rounded">
-
-    </div>
-    <div class="bg-neutral-700 w-full h-40 rounded">
-
-    </div>
-    <div class="bg-neutral-700 w-full h-40 rounded">
-
-    </div>
-    <div class="bg-neutral-700 w-full h-40 rounded">
-
-    </div>
-    <div class="bg-neutral-700 w-full h-40 rounded">
-
-    </div>
+      <div class="text-neutral-400 text-xs">Jakarta Timur</div>
+      <div class="text-center pt-4">Status: Confirmed</div>
+      <div class="flex gap-4 justify-end self-end pt-4">
+        <a {% url 'join:update_join' nobar_place.id %} class="text-green-500">Edit</a>
+        <a {% url 'join:delete_join' nobar_place.id %} class="text-red-600">Delete</a> 
+      </div>
+    </div> {% endcomment %}
+     
   </div>   
 </div>
+<script>
+// Configuration
+const JOIN_API_ENDPOINT = "{% url 'join:get_join' %}";
+const CURRENT_USER_ID = "{{ user.id|default_if_none:'' }}";
+
+// DOM Elements
+const join_grid = document.getElementById('join_grid');
+const filter_joined_spots = document.getElementById('filter_joined_spots')
+const filter_my_spots = document.getElementById('filter_my_spots')
+
+// State Variables
+let activeFilter = 'joined';
+let allJoinData = [];
+
+// Update filter button appearance
+function updateFilterButtonsAppearance() {
+  if (!filter_joined_spots || !filter_my_spots) return;
+  
+  if (activeFilter === 'joined') {
+    filter_joined_spots.className = 'w-1/2 p-1 bg-gradient-to-l from-green-600/30 to-transparent';
+    filter_my_spots.className = 'w-1/2 p-1';
+  } else {
+    filter_my_spots.className = 'w-1/2 p-1 bg-gradient-to-r from-green-600/30 to-transparent';
+    filter_joined_spots.className = 'w-1/2 p-1';
+  }
+}
+
+// Get readable category name
+function getReadableCategoryName(categoryCode) {
+  const categoryMapping = {
+    pasti: 'Pasti',
+    mungkin: 'Mungkin',
+  };
+  return categoryMapping[categoryCode] || categoryCode;
+}
+
+// Create join card element
+function buildJoinCardElement(item) {
+    const article = document.createElement('article');
+
+    const linkEdit = `{% url 'join:update_join' '00000000-0000-0000-0000-000000000000' %}`.replace('00000000-0000-0000-0000-000000000000', item.id);
+    const linkDelete = `{% url 'join:delete_join' '00000000-0000-0000-0000-000000000000' %}`.replace('00000000-0000-0000-0000-000000000000', item.id);
+
+    const title = item.nobar_place_name;
+    const time = item.nobar_place_time;
+    const content = item.nobar_place_city;
+    const category = item.status;
+
+    const categoryLabel = getReadableCategoryName(category);
+
+    const editDeleteHtml = CURRENT_USER_ID && Number(CURRENT_USER_ID) === Number(item.user_id)
+        ? `<div class='flex gap-4 justify-end self-end pt-4'>
+            <a href='${linkEdit}' class='text-green-500 hover:text-gray-700 transition-colors'>Edit</a>
+            <a href='${linkDelete}' class='text-red-600 hover:text-red-800 transition-colors' onclick='return confirm("Are you sure you want to delete this article?")'>Delete</a>
+          </div>`
+        : '';
+
+    const cardHtml = `
+        <div class="bg-neutral-700 w-full rounded p-2 text-sm">
+          <div class="w-full flex justify-between items-center">
+            <div>${title}</div>
+            <div class="text-xs">🕐 ${time}</div>
+          </div>
+          <div class="text-neutral-400 text-xs">${content}</div>
+          <div class="text-center pt-4">Status: ${categoryLabel}</div>
+          ${editDeleteHtml}
+        </div>
+    `;
+    
+    article.innerHTML = cardHtml;
+    return article;
+}
+
+// Render all join cards
+function renderAllJoinCards(joinItems) {
+  join_grid.innerHTML = '';
+  joinItems.forEach(joinItem => {
+    const cardElement = buildJoinCardElement(joinItem);
+    join_grid.appendChild(cardElement);
+  });
+}
+
+// Filter and display join
+function filterAndDisplayJoin() {
+  updateFilterButtonsAppearance();
+  
+  const filteredJoin = activeFilter === 'joined' 
+    ? allJoinData 
+    : allJoinData.filter(join => Number(join.user_id) === Number(CURRENT_USER_ID));
+  
+  renderAllJoinCards(filteredJoin);
+}
+
+// Fetch join data from server
+async function fetchJoinFromServer() {
+  try {
+    
+    const response = await fetch(JOIN_API_ENDPOINT, {
+      headers: { 'Accept': 'application/json' },
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch join data from server');
+    }
+
+    const joinData = await response.json();
+    allJoinData = joinData || [];
+    
+    filterAndDisplayJoin();
+  } catch (error) {
+    console.error('Error loading join:', error);
+  }
+}
+
+// Event handlers
+function handleShowJoinedClick() {
+  activeFilter = 'joined';
+  filterAndDisplayJoin();
+}
+
+function handleShowMyJoinClick() {
+  activeFilter = 'my';
+  filterAndDisplayJoin();
+}
+
+// Initialize page
+function initializeJoinPage() {
+  filter_joined_spots.addEventListener('click', handleShowJoinedClick);
+  filter_my_spots.addEventListener('click', handleShowMyJoinClick);
+  
+  fetchJoinFromServer();
+}
+
+
+// Start application
+initializeJoinPage();
+</script>
 {% endblock content%}

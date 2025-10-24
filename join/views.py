@@ -16,11 +16,18 @@ def post_join(request):
     if form.is_valid() and request.method == 'POST':
         join_entry = form.save(commit = False)
 
-        # join_entry.user = request.user
-        join_entry.user = None
+        if request.user.is_authenticated:
+            join_entry.user = request.user
+        else:
+            join_entry.user = None
 
-        # join_entry.nobar_place = request.nobar_place
-        join_entry.nobar_place = None
+        nobar_place_id = request.POST.get('nobar_place')
+        if nobar_place_id:
+            try:
+                nobar_place = NobarSpot.objects.get(id=nobar_place_id)
+                join_entry.nobar_place = nobar_place
+            except NobarSpot.DoesNotExist:
+                join_entry.nobar_place = None
 
         join_entry.save()
         return redirect('join:show_join')
@@ -35,6 +42,9 @@ def get_join(request):
             'id': str(join_record.id),
             'user_id': join_record.user_id,
             'nobar_place_id': join_record.nobar_place_id,
+            'nobar_place_name': join_record.nobar_place.name,
+            'nobar_place_city': join_record.nobar_place.city,
+            'nobar_place_time': join_record.nobar_place.time.strftime('%H:%M'),
             'status': join_record.status,
             'created_at': join_record.created_at.isoformat() if join_record.created_at else None,
         }
