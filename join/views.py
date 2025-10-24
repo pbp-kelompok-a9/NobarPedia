@@ -1,4 +1,5 @@
-from join.models import Join_List, NobarSpot
+from join.models import Join_List
+from homepage.models import NobarSpot
 from django.shortcuts import render, redirect, get_object_or_404
 import datetime
 from django.urls import reverse
