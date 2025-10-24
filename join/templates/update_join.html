@@ -9,7 +9,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
   </head>
 
-  <body class="bg-black text-white text-justify pt-20 space-y-20 w-[50vw] mx-auto">
+  <body class="bg-black text-white text-justify pt-20 space-y-20 w-40 mx-auto">
     
     <form method="POST" class="space-y-6">
         {% csrf_token %} {% for field in form %}
@@ -20,7 +20,7 @@
           >
             {{ field.label }}
           </label>
-          <div class="w-full">{{ field }}</div>
+          <div >{{ field }}</div>
         </div>
         {% endfor %}
           <button

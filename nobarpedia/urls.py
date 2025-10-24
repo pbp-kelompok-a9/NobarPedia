@@ -19,14 +19,11 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 
-app_name = 'main'
-
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('join/', include('join.urls')),
-    path('account/', include('account.urls', namespace='account')),
-    path('homepage/',include('homepage.urls')),
-    path('', include('review.urls')),
+    path('review/', include('review.urls')),
+    path('', include('homepage.urls')),
 ]
 
 # Untuk serve profile picture

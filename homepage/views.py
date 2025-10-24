@@ -1,8 +1,9 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from homepage.forms import NobarSpotForm
 from homepage.models import NobarSpot
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, JsonResponse
 from django.urls import reverse
+from django.contrib.auth.decorators import login_required
 
 # Create your views here.
 def show_homepage(request):
@@ -13,6 +14,7 @@ def show_homepage(request):
     }
     return render(request, "homepage.html",context)
 
+@login_required(login_url='/account/login')
 def create_spot(request):
     form = NobarSpotForm(request.POST or None)
 
@@ -23,6 +25,21 @@ def create_spot(request):
     context = {'form':form}
     return render(request, "create_spot.html", context)
 
+@login_required(login_url='/account/login')
+def edit_spot(request, id):
+    nobarSpot = get_object_or_404(NobarSpot, pk=id)
+    form = NobarSpotForm(request.POST or None, instance=nobarSpot)
+
+    if form.is_valid() and request.method == 'POST':
+        form.save()
+        return redirect('homepage:show_homepage')
+
+    context = {
+        'form': form
+    }
+
+    return render(request, "edit_spot.html", context)
+
 def show_spot(request):
     nobarSpot = get_object_or_404(NobarSpot,pk=id)
     context={
@@ -30,7 +47,28 @@ def show_spot(request):
     }
     return render(request, "spot_detail.html",context)
 
+@login_required(login_url='/account/login')
 def delete_spot(request,id):
     nobarSpot = get_object_or_404(NobarSpot,pk=id)
     nobarSpot.delete()
-    return HttpResponseRedirect(reverse('main:show_main'))
+    return HttpResponseRedirect(reverse('homepage:show_homepage'))
+
+def show_json(request):
+    spot_list = NobarSpot.objects.all()
+    data = [
+        {
+            'id': str(spot.id),
+            'name': spot.name,
+            'thumbnail': spot.thumbnail,
+            'home_team':spot.home_team,
+            'away_team':spot.away_team,
+            'date':spot.date,
+            'time':spot.time,
+            'city':spot.city,
+            'address':spot.address,
+            'host':spot.host,
+        }
+        for spot in spot_list
+    ]
+
+    return JsonResponse(data, safe=False)
