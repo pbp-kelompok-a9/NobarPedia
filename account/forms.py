@@ -51,8 +51,8 @@ class CustomUserCreationForm(UserCreationForm):
 
 
 class CustomUserEditForm(forms.ModelForm):
-    email = forms.EmailField(required=True)
-    fullname = forms.CharField(max_length=100, required=True)
+    email = forms.EmailField(required=False)
+    fullname = forms.CharField(max_length=100, required=False)
     bio = forms.CharField(widget=forms.Textarea, required=False)
     profile_picture = forms.ImageField(required=False) 
 
