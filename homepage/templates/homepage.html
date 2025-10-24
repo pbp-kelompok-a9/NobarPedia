@@ -78,6 +78,8 @@
     Pick your spot!
   </h2>
 
+
+{% if user.is_authenticated %}
   <!-- Tombol Desktop -->
   <div class="relative w-full max-w-3xl hidden md:flex justify-center mt-8 items-center">
 
@@ -96,7 +98,9 @@
       </button>
     </div>
   </div>
+  {% endif %}
 
+  {% if user.is_authenticated %}
   <!-- Tombol Mobile -->
   <div class="w-full flex flex-col items-center gap-4 mt-8 md:hidden">
     
@@ -107,15 +111,16 @@
 
     <!-- Tombol tengah -->
     <div class="flex justify-center gap-4 w-[70%]">
-      <button class="flex-1 bg-green-600 hover:bg-green-700 text-white font-medium px-5 py-2 rounded-md transition">
+      <a id="filter-all" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-medium px-5 py-2 rounded-md transition">
         All Spot
-      </button>
-      <button class="flex-1 border border-green-600 text-white font-medium px-5 py-2 rounded-md hover:bg-green-600 transition">
+      </a>
+      <a id="filter-my" class="flex-1 border border-green-600 text-white font-medium px-5 py-2 rounded-md hover:bg-green-600 transition">
         Your Spot
-      </button>
+      </a>
     </div>
 
-  </div>
+   </div>
+  {% endif %}
 
     <!-- Loading Spinner -->
   <div id="loading" class="bg-[#1E1E1E] text-center py-12 hidden">
@@ -131,8 +136,7 @@
 
   <!-- Empty State -->
   <div id="empty" class="hidden text-center py-16">
-    <img src="{% static 'image/no-news.png' %}" alt="No spots" class="w-40 h-40 mx-auto mb-4 opacity-80">
-    <h3 class="text-xl font-semibold mb-2">No spots found</h3>
+    <h3 class="text-xl mb-2">No spots found</h3>
     <p class="text-gray-400 mb-6">Be the first to create a new spot!</p>
     <a href="{% url 'homepage:create_spot' %}" class="bg-green-600 hover:bg-green-700 text-white font-medium px-5 py-2 rounded-md transition">
       + Add New Spot
@@ -154,11 +158,24 @@ const error = document.getElementById('error');
 const empty = document.getElementById('empty');
 const grid = document.getElementById('spot-grid');
 
-const allBtn = document.querySelectorAll("button")[0]; // All Spot
-const yourBtn = document.querySelectorAll("button")[1]; // Your Spot
+const allBtn = document.getElementById('filter-all');
+const yourBtn = document.getElementById('filter-my');
 
 let allSpots = [];
 let activeFilter = 'all';
+
+// Update filter button appearance
+function updateFilterButtonsAppearance() {
+  if (!allBtn || !yourBtn) return;
+  
+  if (activeFilter === 'all') {
+    allBtn.className = 'flex-1 bg-green-600 hover:bg-green-700 text-white font-medium px-5 py-2 rounded-md transition';
+    yourBtn.className = 'flex-1 border border-green-600 text-white font-medium px-5 py-2 rounded-md hover:bg-green-600 transition';
+  } else {
+    yourBtn.className = 'flex-1 bg-green-600 hover:bg-green-700 text-white font-medium px-5 py-2 rounded-md transition';
+    allBtn.className = 'flex-1 border border-green-600 text-white font-medium px-5 py-2 rounded-md hover:bg-green-600 transition';
+  }
+}
 
 // Toggle visibility
 function showSection({ loading: showLoading=false, error: showError=false, empty: showEmpty=false, grid: showGrid=false }) {
@@ -171,12 +188,25 @@ function showSection({ loading: showLoading=false, error: showError=false, empty
 // Build one card
 function buildSpotCard(spot) {
     const div = document.createElement('div');
-    div.className = "bg-white rounded-xl shadow hover:shadow-lg transition overflow-hidden text-gray-900 flex flex-col"; // Kelas container utama
+    div.className = "bg-white rounded-xl shadow hover:shadow-lg transition overflow-hidden text-gray-900 flex flex-col";
 
-    const joinUrl = `/join/${spot.id}`;
-    const editUrl = `/homepage/edit-spot/${spot.id}`;
-    const deleteUrl = `/homepage/delete-spot/${spot.id}`;
+    const linkDetail = `{% url 'homepage:show_homepage'%}`;
+    const linkEdit = `{% url 'homepage:edit_spot' '00000000-0000-0000-0000-000000000000' %}`.replace('00000000-0000-0000-0000-000000000000', spot.id);
+    const linkDelete = `{% url 'homepage:delete_spot' '00000000-0000-0000-0000-000000000000' %}`.replace('00000000-0000-0000-0000-000000000000', spot.id);
+
     const formattedTime = spot.time ? spot.time.split(':').slice(0, 2).join(':') : '';
+
+    let editdeleteButtons = '';
+    if (CURRENT_USER_ID && Number(CURRENT_USER_ID) === Number(spot.host_id)){
+      editdeleteButtons =  `
+      <div class="flex gap-2 ml-3">
+        <a href="${linkEdit}" class="text-green-600 hover:text-green-700 text-sm font-medium py-2 px-1">Edit</a>
+        <a href="${linkDelete}" 
+            onclick="return confirm('Apakah Anda yakin ingin menghapus Spot ini?')"
+            class="text-red-600 hover:text-red-700 text-sm font-medium py-2 px-1">Hapus</a>
+      </div>
+    `;
+    }
 
     div.innerHTML = `
         <div class="p-2"> 
@@ -197,24 +227,9 @@ function buildSpotCard(spot) {
             <p class="footnote text-sm text-gray-500 mb-4">${spot.city}</p>
             
             <div class="mt-auto flex items-center pt-2">
-               <a href="${joinUrl}" class="flex-1 bg-green-600 hover:bg-green-700 text-white text-base font-medium px-4 py-2 rounded-md text-center">Detail</a>
-               ${Number(CURRENT_USER_ID) === Number(spot.host_id)
-                ? `
-                    <div class="flex gap-2 ml-3"> 
-                      <a href="${editUrl}" class="text-green-600 hover:text-green-700 text-sm font-medium py-2 px-1">
-                      Edit
-                      </a>
-                      <a href="${deleteUrl}" 
-                          onclick="return confirm('Apakah Anda yakin ingin menghapus Spot ini?')"
-                          class="text-red-600 hover:text-red-700 text-sm font-medium py-2 px-1">
-                          Hapus
-                      </a>
-                      </div>
-                    `
-                  : ''
-                 }
-             </div>
-
+               <a href="${linkDetail}" class="flex-1 bg-green-600 hover:bg-green-700 text-white text-base font-medium px-4 py-2 rounded-md text-center">Detail</a>
+                    ${editdeleteButtons}
+            </div>
 
         </div>
     `;
@@ -229,6 +244,8 @@ function renderSpots(spots) {
 
 // Filter
 function filterSpots() {
+  updateFilterButtonsAppearance();
+
   const filtered = activeFilter === 'all'
     ? allSpots
     : allSpots.filter(s => Number(s.host_id) === Number(CURRENT_USER_ID));
@@ -256,17 +273,24 @@ async function fetchSpots() {
 }
 
 // Buttons
-allBtn.addEventListener('click', () => {
-  activeFilter = 'all';
-  fetchSpots();
-});
-yourBtn.addEventListener('click', () => {
-  activeFilter = 'your';
-  fetchSpots();
-});
+if (allBtn) {
+  allBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    activeFilter = 'all';
+    fetchSpots();
+  });
+}
+
+if (yourBtn) {
+  yourBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    activeFilter = 'your';
+    fetchSpots();
+  });
+}
 
 // Start
-fetchSpots();
+document.addEventListener('DOMContentLoaded', fetchSpots);
 </script>
 
 

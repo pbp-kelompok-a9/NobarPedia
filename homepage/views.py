@@ -48,7 +48,7 @@ def show_spot(request):
 def delete_spot(request,id):
     nobarSpot = get_object_or_404(NobarSpot,pk=id)
     nobarSpot.delete()
-    return HttpResponseRedirect(reverse('main:show_main'))
+    return HttpResponseRedirect(reverse('homepage:show_homepage'))
 
 def show_json(request):
     spot_list = NobarSpot.objects.all()
