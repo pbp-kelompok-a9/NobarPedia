@@ -18,19 +18,6 @@
   </div>
 
   <div id="join_grid" class="w-[75vw] grid grid-cols-2 gap-8 mx-auto">
-    
-    {% comment %} <div class="bg-neutral-700 w-full rounded p-2 text-sm">
-      <div class="w-full flex justify-between items-center">
-        <div>Nama Tempattttt</div>
-        <div class="text-xs">🕐 22.00 - 00.00</div>
-      </div>
-      <div class="text-neutral-400 text-xs">Jakarta Timur</div>
-      <div class="text-center pt-4">Status: Confirmed</div>
-      <div class="flex gap-4 justify-end self-end pt-4">
-        <a {% url 'join:update_join' nobar_place.id %} class="text-green-500">Edit</a>
-        <a {% url 'join:delete_join' nobar_place.id %} class="text-red-600">Delete</a> 
-      </div>
-    </div> {% endcomment %}
      
   </div>   
 </div>
@@ -103,9 +90,9 @@ function buildCardElement(item, type) {
         title = item.name;
         time = item.time;
         content = item.city;
-        category = `Joined: ${item.joined_count}`; // Display joined count
-        user_id = item.host_id; // assuming NobarSpot has a host_id
-        statusPrefix = ''; // No 'Status: ' prefix for NobarSpot
+        category = `Joined: ${item.joined_count}`; 
+        user_id = item.host_id; 
+        statusPrefix = ''; 
 
         linkEdit = `{% url 'homepage:edit_spot' '00000000-0000-0000-0000-000000000000' %}`.replace('00000000-0000-0000-0000-000000000000', id);
         linkDelete = `{% url 'homepage:delete_spot' '00000000-0000-0000-0000-000000000000' %}`.replace('00000000-0000-0000-0000-000000000000', id);

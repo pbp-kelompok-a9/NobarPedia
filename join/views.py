@@ -6,11 +6,9 @@ from django.urls import reverse
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from join.forms import JoinForm
 
-# done
 def show_join(request):
     return render(request, "join.html")
 
-# done just attach user and nobar_place into the request
 def post_join(request, nobar_place_id):
     form = JoinForm(request.POST or None)
 
