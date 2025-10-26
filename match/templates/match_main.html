@@ -1,5 +1,8 @@
 {% extends 'base.html' %}
 {% load static %}
+{% block head %}
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.5/dist/purify.min.js"></script>
+{% endblock head %}
 {% block content %}
     <div class="bg-stone-900 w-full pt-16 min-h-screen">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -33,6 +36,7 @@
             </div>
         </div>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.5/dist/purify.min.js"></script>
     <script defer>
         const gridContainer = document.querySelector("#grid")
         let activeFilter = "match";
@@ -81,6 +85,7 @@
             // 3. Format the date using the determined options
             return new Intl.DateTimeFormat('en-US', options).format(date);
         }
+    
     
         function buildMatchCard(item) {
             const card = document.createElement('div');
@@ -135,8 +140,6 @@
                         </a>
                     </div>
                 </div>
-                <a href=""
-                   class="inline-block text-white text-center transition-all hover:text-green-600 w-full">Find Showing Places</a>
             `
             card.innerHTML = matchCard;
             return card;
@@ -212,6 +215,8 @@
             card.innerHTML = matchCard;
             return card;
         }
+
+
 
 
         function renderAllCards() {
@@ -312,6 +317,7 @@
             }
         }
 
+        
         async function fetchPlayerIdFromServer(id) {
             try {
                 const link = `{% url 'match:api_read_player' '00000000-0000-0000-0000-000000000000' %}`.replace('00000000-0000-0000-0000-000000000000', id);
