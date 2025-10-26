@@ -3,6 +3,8 @@ from . import views
 from .models import Competition, Match, Player
 from .forms import CompetitionForm, MatchForm, PlayerForm
 
+app_name = 'match'
+
 urlpatterns = [
     path('match/', views.match_main, name="match_main"),
 
@@ -58,4 +60,38 @@ urlpatterns = [
         model_class=Player,
         opt='d'
     ), name='api_delete_player'),
+
+
+    path('api/match/post/read_competition/<str:id>/', views.BasicMatchAPIView.as_view(
+        model_class=Competition,
+        opt='r'
+    ), name='api_read_competition'),
+
+    path('api/match/post/read_match/<str:id>/', views.BasicMatchAPIView.as_view(
+        model_class=Match,
+        opt='r'
+    ), name='api_read_match'),
+
+    path('api/match/post/read_player/<str:id>/', views.BasicMatchAPIView.as_view(
+        model_class=Player,
+        opt='r'
+    ), name='api_read_player'),
+
+
+    path('api/match/post/read_all_competition/', views.BasicMatchAPIView.as_view(
+        model_class=Competition,
+        opt='ra'
+    ), name='api_read_all_competition'),
+
+    path('api/match/post/read_all_match/', views.BasicMatchAPIView.as_view(
+        model_class=Match,
+        opt='ra'
+    ), name='api_read_all_match'),
+
+    path('api/match/post/read_all_player/', views.BasicMatchAPIView.as_view(
+        model_class=Player,
+        opt='ra'
+    ), name='api_read_all_player'),
+
+
 ]
