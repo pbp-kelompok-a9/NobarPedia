@@ -1,0 +1,14 @@
+<div class="bg-stone-800 rounded-lg p-2">
+    <div class="flex justify-between w-full">
+        <h3 class="text-lg font-medium text-white mb-2"> {{ competition.name }} </h3>
+        <p class="text-sm font-small text-white">{{ competition.begin_date }} - {{ competition.end_date }}</p>
+    </div>
+    <div class="grid grid-cols-5 w-full items-center">
+        {% if competition.logo %}
+            <img width="400"
+                 height="400"
+                 src="{{ match.players.0.logo }}">
+        {% endif %}
+    </div>
+</div>
+

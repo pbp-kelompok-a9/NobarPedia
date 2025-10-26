@@ -11,41 +11,323 @@
             <!-- Filter Section -->
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8 bg-stone-800 rounded-lg">
                 <div class="flex mb-4 sm:mb-0 w-full select-none">
-                    <a id="filter-matches"
-                       class="relative z-10 w-full rounded-md bg-transparent px-4 py-2 font-medium text-white overflow-hidden before:content-[''] before:absolute before:inset-0 before:-z-10 before:bg-gradient-to-r before:from-stone-800 before:to-green-800 before:opacity-0 before:transition-opacity before:duration-300 hover:before:opacity-100 text-center">
+                    <button id="filter-matches"
+                       class="relative z-10 w-full rounded-md bg-transparent px-4 py-2 font-medium text-white overflow-hidden before:content-[''] before:absolute before:inset-0 before:-z-10 before:bg-gradient-to-r before:from-stone-800 before:to-green-800 before:opacity-0 before:transition-opacity before:duration-300 hover:before:opacity-100 text-center"
+                        onclick="fetchMatchFromServer()">
                         Matches
-                    </a>
-                    <a id="filter-competitions"
-                       class="relative z-10 w-full rounded-md bg-transparent px-4 py-2 font-medium text-white overflow-hidden before:content-[''] before:absolute before:inset-0 before:-z-10 before:bg-gradient-to-r before:from-stone-800 before:to-green-800 before:opacity-0 before:transition-opacity before:duration-300 hover:before:opacity-100 text-center">
+                    </button>
+                    <button id="filter-competitions"
+                       class="relative z-10 w-full rounded-md bg-transparent px-4 py-2 font-medium text-white overflow-hidden before:content-[''] before:absolute before:inset-0 before:-z-10 before:bg-gradient-to-r before:from-stone-800 before:to-green-800 before:opacity-0 before:transition-opacity before:duration-300 hover:before:opacity-100 text-center"
+                       onclick="fetchCompetitionFromServer()">
                         Competitions
-                    </a>
-                    <a id="filter-players"
-                       class="relative z-10 w-full rounded-md bg-transparent px-4 py-2 font-medium text-white overflow-hidden before:content-[''] before:absolute before:inset-0 before:-z-10 before:bg-gradient-to-r before:from-stone-800 before:to-green-800 before:opacity-0 before:transition-opacity before:duration-300 hover:before:opacity-100 text-center">
+                    </button>
+                    <button id="filter-players"
+                       class="relative z-10 w-full rounded-md bg-transparent px-4 py-2 font-medium text-white overflow-hidden before:content-[''] before:absolute before:inset-0 before:-z-10 before:bg-gradient-to-r before:from-stone-800 before:to-green-800 before:opacity-0 before:transition-opacity before:duration-300 hover:before:opacity-100 text-center"
+                       onclick="fetchPlayerFromServer()">
                         Players
-                    </a>
+                    </button>
                 </div>
-                {% if user.is_authenticated %}<div class="text-sm text-gray-500">Last login: {{ last_login }}</div>{% endif %}
             </div>
-            <!-- Loading State -->
-            <div id="loading"
-                 class="bg-white rounded-lg border border-gray-200 p-12 text-center hidden">
-                <svg class="animate-spin h-8 w-8 text-green-600 inline-block"
-                     xmlns="http://www.w3.org/2000/svg"
-                     fill="none"
-                     viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
-                </svg>
-                <p class="text-gray-600 mt-3">Loading news...</p>
-            </div>
-            <!-- Error State -->
-            <div id="error" class="hidden"></div>
-            <!-- News Grid -->
             <div id="grid" class="bg-transparent p-4 rounded-lg grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
             </div>
-            <!-- Empty State -->
-            <div id="empty" class="bg-stone-800 rounded-lg p-12 text-center hidden"></div>
         </div>
     </div>
-    <script src="{% static 'js/match_main.js' %}" defer></script>
+    <script defer>
+        const gridContainer = document.querySelector("#grid")
+        let activeFilter = "match";
+        let allData = [];
+    
+        function formatDateTime(dateTimeString) {
+            // Check if it's a date-only string (e.g., "2025-10-22")
+            const isDateOnly = !dateTimeString.includes('T');
+
+            let date;
+            let options;
+
+            if (isDateOnly) {
+                // --- Handle Date-Only String ---
+
+                // 1. To avoid timezone issues, we treat the date-only
+                // string as UTC midnight by appending 'T00:00:00Z'.
+                date = new Date(dateTimeString + 'T00:00:00Z');
+
+                // 2. Define options for formatting the date only
+                options = {
+                    year: 'numeric',  // e.g., 2025
+                    month: 'long',    // e.g., October
+                    day: 'numeric',     // e.g., 22
+                    timeZone: 'UTC'   // Interpret the date as UTC
+                };
+
+            } else {
+                // --- Handle Full DateTime String ---
+
+                // 1. Create a Date object from the full ISO string
+                date = new Date(dateTimeString);
+
+                // 2. Define options for formatting the date and time
+                options = {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: 'numeric',
+                    minute: 'numeric',
+                    hour12: true,
+                    timeZone: 'UTC' // The 'Z' in the original string means UTC
+                };
+            }
+
+            // 3. Format the date using the determined options
+            return new Intl.DateTimeFormat('en-US', options).format(date);
+        }
+    
+        function buildMatchCard(item) {
+            const card = document.createElement('div');
+            card.className = 'bg-stone-800 rounded-lg p-2';
+            console.log(item);
+
+
+            const name = DOMPurify.sanitize(item.competition[0].fields.name);
+            const begin_datetime = DOMPurify.sanitize(formatDateTime(item.fields.begin_datetime));
+            const end_datetime = DOMPurify.sanitize(formatDateTime(item.fields.end_datetime));
+            const first_logo = DOMPurify.sanitize(item.players[0][0].fields.logo);
+            const second_logo = DOMPurify.sanitize(item.players[1][0].fields.logo);
+            const first_player_name = DOMPurify.sanitize(item.players[0][0].fields.name);
+            const second_player_name = DOMPurify.sanitize(item.players[1][0].fields.name);
+
+            let first_logo_html = "";
+            let second_logo_html = "";
+
+            if (first_logo.length > 0) {
+                first_logo_html = `
+                    <img width="400"
+                         height="400"
+                         src="${first_logo}">
+                `
+            }
+
+            if (second_logo.length > 0) {
+                second_logo_html = `
+                    <img width="400"
+                         height="400"
+                         src="${second_logo}">
+                `
+            }
+
+            const matchCard = `
+                <div class="flex flex-col justify-center w-full">
+                    <h3 class="text-lg font-medium text-center text-white mb-2"> ${name} </h3>
+                    <p class="text-sm font-small text-center text-white">${begin_datetime} - ${end_datetime}</p>
+                </div>
+                <div class="grid grid-cols-5 w-full items-center">
+                    <div class="col-span-2 w-full justify-center text-center text-white">
+                        <a href="" class="text-white transition-all hover:text-green-600">
+                            ${first_logo_html}
+                            ${first_player_name}
+                        </a>
+                    </div>
+                    <h3 class="select-none text-center text-white text-3xl font-medium">vs</h3>
+                    <div class="col-span-2 w-full justify-center text-center text-white">
+                        <a href="" class="text-white transition-all hover:text-green-600">
+                            ${second_logo_html}
+                            ${second_player_name}
+                        </a>
+                    </div>
+                </div>
+                <a href=""
+                   class="inline-block text-white text-center transition-all hover:text-green-600 w-full">Find Showing Places</a>
+            `
+            card.innerHTML = matchCard;
+            return card;
+        }
+
+        function buildCompetitionCard(item) {
+            const card = document.createElement('div');
+            card.className = 'bg-stone-800 rounded-lg p-2';
+            console.log(item);
+
+
+            const name = DOMPurify.sanitize(item.fields.name);
+            const begin_date = DOMPurify.sanitize(formatDateTime(item.fields.begin_date));
+            const end_date = DOMPurify.sanitize(formatDateTime(item.fields.end_date));
+            const logo = DOMPurify.sanitize(item.fields.logo);
+
+            let logo_html = "";
+
+            if (logo.length > 0) {
+                logo_html = `
+                    <img width="400"
+                         height="400"
+                         src="${logo}">
+                `
+            }
+
+            const matchCard = `
+            <div class="bg-stone-800 rounded-lg p-2">
+                <h3 class="text-lg font-medium text-center text-white mb-2"> ${name} </h3>
+                <p class="text-sm font-small text-center text-white">${begin_date} - ${end_date}</p>
+                <div class="grid grid-cols-5 w-full items-center">
+                    ${logo_html}
+                </div>
+            </div>            
+            `
+            card.innerHTML = matchCard;
+            return card;
+        }
+
+        function buildPlayerCard(item) {
+            const card = document.createElement('div');
+            card.className = 'bg-stone-800 rounded-lg p-2';
+            console.log(item);
+
+
+            const name = DOMPurify.sanitize(item.fields.name);
+            const logo = DOMPurify.sanitize(item.fields.logo);
+            const established_date = formatDateTime(item.fields.established_date);
+
+            let logo_html = "";
+            let defunct_html = ""
+
+            if (logo.length > 0) {
+                logo_html = `
+                    <img width="400"
+                         height="400"
+                         src="${logo}">
+                `
+            }
+
+            if (item.fields.is_defunct) {
+                defunct_html = '<p class="text-sm font-small text-red">Defunct</p>';
+            }
+
+            const matchCard = `
+                <h3 class="text-lg font-medium text-center text-white mb-2"> ${name} </h3>
+                <p class="text-sm font-small text-center text-white">${established_date}</p>
+                ${defunct_html}
+                <div class="grid w-full items-center">
+                    ${logo_html}    
+                </div>
+            `
+            card.innerHTML = matchCard;
+            return card;
+        }
+
+
+        function renderAllCards() {
+            gridContainer.innerHTML = '';
+            if (activeFilter == 'match') {
+                Array.from(allData).forEach(function(item) {
+                    gridContainer.appendChild(buildMatchCard(item));
+                })
+            } else if (activeFilter == 'competition') {
+                Array.from(allData).forEach(function(item) {
+                    gridContainer.appendChild(buildCompetitionCard(item));
+                })
+            } else {
+                Array.from(allData).forEach(function(item) {
+                    gridContainer.appendChild(buildPlayerCard(item));
+                })
+            }
+        }
+
+        async function fetchMatchFromServer() {
+            try {
+                const response = await fetch("{% url 'match:api_read_all_match' %}", {
+                    headers: { 'Accept': 'application/json' },
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch data from server');
+                }
+                const matchData = await response.json();
+                allData = JSON.parse(matchData || []);
+                console.log(allData);
+                for (const item of allData) {
+                    item.competition = JSON.parse(await fetchCompetitionIdFromServer(item.fields.competition));
+                    const p_1 = await fetchPlayerIdFromServer(item.fields.players[0]);
+                    const p_2 = await fetchPlayerIdFromServer(item.fields.players[1]);
+                    item.players = [JSON.parse(p_1), JSON.parse(p_2)];
+                }
+
+                console.log(allData);
+                activeFilter = "match";
+                renderAllCards();
+            } catch (error) {
+                console.error('Error loading', error);
+            }
+        }
+
+        async function fetchCompetitionFromServer() {
+            try {
+                const response = await fetch("{% url 'match:api_read_all_competition' %}", {
+                    headers: { 'Accept': 'application/json' },
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch data from server');
+                }
+                const matchData = await response.json();
+                allData = JSON.parse(matchData || []);
+                activeFilter = "competition";
+                renderAllCards();
+            } catch (error) {
+                console.error('Error loading', error);
+            }
+        }
+
+        async function fetchPlayerFromServer() {
+            try {
+                const response = await fetch("{% url 'match:api_read_all_player' %}", {
+                    headers: { 'Accept': 'application/json' },
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch data from server');
+                }
+                const matchData = await response.json();
+                allData = JSON.parse(matchData || []);
+                activeFilter = "players";
+                renderAllCards();
+            } catch (error) {
+                console.error('Error loading', error);
+            }
+        }
+
+
+        async function fetchCompetitionIdFromServer(id) {
+            try {
+                const link = `{% url 'match:api_read_competition' '00000000-0000-0000-0000-000000000000' %}`.replace('00000000-0000-0000-0000-000000000000', id);
+                const response = await fetch(link, {
+                    headers: { 'Accept': 'application/json' },
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch data from server');
+                }
+                const data = await response.json();
+                return data || [];
+            } catch (error) {
+                console.error('Error loading', error);
+            }
+        }
+
+        async function fetchPlayerIdFromServer(id) {
+            try {
+                const link = `{% url 'match:api_read_player' '00000000-0000-0000-0000-000000000000' %}`.replace('00000000-0000-0000-0000-000000000000', id);
+                const response = await fetch(link, {
+                    headers: { 'Accept': 'application/json' },
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch data from server');
+                }
+                const data = await response.json();
+                return data || [];
+            } catch (error) {
+                console.error('Error loading', error);
+            }
+        }
+        
+    </script>
 {% endblock content %}
