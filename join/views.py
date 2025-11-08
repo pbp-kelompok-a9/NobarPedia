@@ -30,7 +30,7 @@ def post_join(request, nobar_place_id):
     return render(request, "post_join.html", context)
 
 def get_join(request):
-    join_list = Join_List.objects.all()
+    join_list = Join_List.objects.filter(user=request.user)
     data = [
         {
             'id': str(join_record.id),
