@@ -1,3 +1,4 @@
+from django.contrib.auth.decorators import login_required
 from join.models import Join_List
 from homepage.models import NobarSpot
 from django.shortcuts import render, redirect, get_object_or_404
@@ -9,22 +10,29 @@ from join.forms import JoinForm
 def show_join(request):
     return render(request, "join.html")
 
+@login_required(login_url='/account/login')
 def post_join(request, nobar_place_id):
     form = JoinForm(request.POST or None)
 
     if form.is_valid() and request.method == 'POST':
-        join_entry = form.save(commit = False)
+        nobar_place = get_object_or_404(NobarSpot, pk=nobar_place_id)
+        existing_join = Join_List.objects.filter(user=request.user, nobar_place=nobar_place).first()
 
-        if request.user.is_authenticated:
-            join_entry.user = request.user
+        # already joined?
+        if existing_join:
+            new_status = form.cleaned_data.get('status')
+
+            # different status?
+            if existing_join.status != new_status:
+                existing_join.status = new_status
+                existing_join.save(update_fields=['status'])
+            return redirect('join:show_join')
         else:
-            join_entry.user = None
-
-        nobar_place = get_object_or_404(NobarSpot, id=nobar_place_id)
-        join_entry.nobar_place = nobar_place
-
-        join_entry.save()
-        return redirect('join:show_join')
+            join_entry = form.save(commit=False)
+            join_entry.user = request.user
+            join_entry.nobar_place = nobar_place
+            join_entry.save()
+            return redirect('join:show_join')
 
     context = {'form': form}
     return render(request, "post_join.html", context)
