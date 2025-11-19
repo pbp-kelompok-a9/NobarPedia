@@ -147,6 +147,64 @@
 
 </section>
 
+<!-- List of ma -->
+<section id="list-match" class="relative flex flex-col items-center text-white bg-[#1E1E1E] py-20 w-full">
+  <!-- Judul -->
+  <h2 class="text-2xl md:text-3xl mb-8 tracking-wide text-center">
+    View current matches, competitions, and even players!
+  </h2>
+
+
+{% if user.is_authenticated %}
+  <!-- Tombol Desktop -->
+  <div class="relative w-full max-w-3xl hidden md:flex justify-center mt-8 items-center">
+    
+    {% if perms.auth.view_user %}
+        <button id="matchbtn" onclick="addMatchItem()"
+          class="absolute -left-48 bg-green-600 hover:bg-green-700 text-white font-medium px-5 py-2 rounded-md transition">
+          + Add New Match
+        </button>
+    {% endif %}
+
+    <!-- Tombol tengah -->
+    <div class="flex gap-4">
+      <button id="filter-all"class="bg-green-600 hover:bg-green-700 text-white font-medium px-5 py-2 rounded-md transition">
+        All Spot
+      </button>
+      <button id="filter-my"class="border border-green-600 text-white font-medium px-5 py-2 rounded-md hover:bg-green-600 transition">
+        Your Spot
+      </button>
+    </div>
+  </div>
+  {% endif %}
+
+    <!-- Loading Spinner -->
+  <div id="loading" class="bg-[#1E1E1E] text-center py-12 hidden">
+    <svg class="animate-spin h-8 w-8 text-green-600 inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+    </svg>
+    <p class="text-gray-400 mt-3">Loading spots...</p>
+  </div>
+
+  <!-- Error State -->
+  <div id="error" class="hidden text-red-500 text-center py-12">Failed to load spots. Please try again later.</div>
+
+  <!-- Empty State -->
+  <div id="empty" class="hidden text-center py-16">
+    <h3 class="text-xl mb-2">No spots found</h3>
+    <p class="text-gray-400 mb-6">Be the first to create a new spot!</p>
+    
+  </div>
+
+  <!-- Grid Container -->
+  <div id="match-grid" class="hidden grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-12 w-[90%] md:w-[80%]"></div>
+
+
+</section>
+
+
+
 <script>
 const SPOT_API = "{% url 'homepage:show_json' %}";
 const CURRENT_USER_ID = "{{ user.id|default_if_none:'' }}";
@@ -161,6 +219,17 @@ const yourBtns = document.querySelectorAll('#filter-my');
 
 let allSpots = [];
 let activeFilter = 'all';
+
+let matchGrid = document.getElementById('match-grid');
+let activeMatchFilter = 'match'; // match or competition or player
+let allMatch = [];
+let isAdmin;
+{% if perms.auth.view_user %}
+    isAdmin = true;
+{% else %}
+    isAdmin = false;
+{% endif %}
+
 
 function updateFilterButtonsAppearance() {
   allBtns.forEach(btn => {
@@ -183,12 +252,39 @@ function showSection({ loading: showLoading=false, error: showError=false, empty
   grid.classList.toggle('hidden', !showGrid);
 }
 
+function addMatchItem() {
+    if (activeMatchFilter === "match") {
+
+
+    } else if (activeMatchFilter === "player") {
+
+    } else { // competition
+
+    }
+}
+
+function renderMatches() {
+  grid.innerHTML = '';
+  allMatch.forEach(s => matchGrid.appendChild(buildMatchCard(s)));
+}
+
+function buildMatchCard(data) {
+    if (activeMatchFilter === "match") {
+
+    } else if (activeMatchFilter === "player") {
+
+    } else { // competition
+
+    }
+}
+
 function safeFormatDate(dateStr) {
   if (!dateStr) return '';
   const d = new Date(dateStr);
   if (isNaN(d.getTime())) return dateStr;
   return d.toLocaleDateString('en-US', { month:'short', day:'2-digit' });
 }
+
 
 function buildSpotCard(spot) {
     const div = document.createElement('div');
@@ -244,6 +340,66 @@ function renderSpots(spots) {
   grid.innerHTML = '';
   spots.forEach(s => grid.appendChild(buildSpotCard(s)));
 }
+
+async function fetchMatchFromServer() {
+    try {
+        const response = await fetch("{% url 'match:api_read_all_match' %}", {
+            headers: { 'Accept': 'application/json' },
+        });
+        if (!response.ok) {
+            throw new Error('Failed to fetch data from server');
+        }
+        const matchData = await response.json();
+        allMatch = JSON.parse(matchData || []);
+        console.log(allData);
+        for (const item of allMatch) {
+            item.competition = JSON.parse(await fetchCompetitionIdFromServer(item.fields.competition));
+            const p_1 = await fetchPlayerIdFromServer(item.fields.players[0]);
+            const p_2 = await fetchPlayerIdFromServer(item.fields.players[1]);
+            item.players = [JSON.parse(p_1), JSON.parse(p_2)];
+        }
+        console.log(allData);
+        activeFilter = "match";
+        renderMatches();
+    } catch (error) {
+        console.error('Error loading', error);
+    }
+}
+
+async function fetchCompetitionIdFromServer(id) {
+    try {
+        const link = `{% url 'match:api_read_competition' '00000000-0000-0000-0000-000000000000' %}`.replace('00000000-0000-0000-0000-000000000000', id);
+        const response = await fetch(link, {
+            headers: { 'Accept': 'application/json' },
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch data from server');
+        }
+        const data = await response.json();
+        return data || [];
+    } catch (error) {
+        console.error('Error loading', error);
+    }
+}
+
+ async function fetchPlayerIdFromServer(id) {
+    try {
+        const link = `{% url 'match:api_read_player' '00000000-0000-0000-0000-000000000000' %}`.replace('00000000-0000-0000-0000-000000000000', id);
+        const response = await fetch(link, {
+            headers: { 'Accept': 'application/json' },
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch data from server');
+        }
+        const data = await response.json();
+        return data || [];
+    } catch (error) {
+        console.error('Error loading', error);
+    }
+}
+
 
 function filterSpots() {
   updateFilterButtonsAppearance();

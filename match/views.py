@@ -7,6 +7,7 @@ from django.forms.models import model_to_dict
 from django.core import serializers
 from django.forms import Form
 from django.views import View
+from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from django.shortcuts import get_object_or_404
 from . import models
@@ -33,6 +34,7 @@ class BasicMatchAPIView(View):
     form_class: type[Form] = None
     opt: chr = None
 
+    @method_decorator(csrf_exempt)
     def get(self, request: HttpRequest, *args, **kwargs):
         """Handles GET requests (e.g., reading/listing data)"""
         match self.opt:
@@ -45,8 +47,7 @@ class BasicMatchAPIView(View):
             case _:
                 return HttpResponseNotAllowed('opt not r for POST request')
 
-    @method_decorator(login_required)
-    @method_decorator(permission_required('main.admin'))
+    @method_decorator(csrf_exempt)
     def post(self, request: HttpRequest, *args, **kwargs):
         """Handles POST requests (e.g., creating data)"""
         match self.opt:
