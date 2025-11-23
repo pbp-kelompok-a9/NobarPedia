@@ -38,22 +38,23 @@ def post_join(request, nobar_place_id):
     return render(request, "post_join.html", context)
 
 def get_join(request):
-    join_list = Join_List.objects.filter(user=request.user)
-    data = [
-        {
-            'id': str(join_record.id),
-            'user': join_record.user.username if join_record.user else None,
-            'user_id': str(join_record.user.id) if join_record.user else None,
-            'nobar_place_id': join_record.nobar_place_id,
-            'nobar_place_name': join_record.nobar_place.name if join_record.nobar_place else None,
-            'nobar_place_city': join_record.nobar_place.city if join_record.nobar_place else None,
-            'nobar_place_time': join_record.nobar_place.time.strftime('%H:%M') if join_record.nobar_place and join_record.nobar_place.time
-    else None,
-            'status': join_record.status,
-            'created_at': join_record.created_at.isoformat() if join_record.created_at else None,
-        }
-        for join_record in join_list
-    ]
+    if (request.user.is_authenticated):
+        join_list = Join_List.objects.filter(user=request.user)
+        data = [
+            {
+                'id': str(join_record.id),
+                'user': join_record.user.username if join_record.user else None,
+                'user_id': str(join_record.user.id) if join_record.user else None,
+                'nobar_place_id': join_record.nobar_place_id,
+                'nobar_place_name': join_record.nobar_place.name if join_record.nobar_place else None,
+                'nobar_place_city': join_record.nobar_place.city if join_record.nobar_place else None,
+                'nobar_place_time': join_record.nobar_place.time.strftime('%H:%M') if join_record.nobar_place and join_record.nobar_place.time
+        else None,
+                'status': join_record.status,
+                'created_at': join_record.created_at.isoformat() if join_record.created_at else None,
+            }
+            for join_record in join_list
+        ]
 
     return JsonResponse(data, safe=False)
 
