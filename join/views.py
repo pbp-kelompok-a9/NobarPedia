@@ -6,6 +6,10 @@ import datetime
 from django.urls import reverse
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from join.forms import JoinForm
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.html import strip_tags
+import json
+from django.http import JsonResponse
 
 def show_join(request):
     return render(request, "join.html")
@@ -78,3 +82,22 @@ def delete_join(request, id):
     join_record = get_object_or_404(Join_List, pk=id)
     join_record.delete()
     return HttpResponseRedirect(reverse('join:show_join'))
+
+@csrf_exempt
+def create_join_flutter(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        user = request.user
+        status = data.get('status')
+        nobar_place_id = data.get('nobar_place_id')
+        
+        new_join = Join_List(
+            status = status,
+            user = user,
+            nobar_place_id = nobar_place_id
+        )
+        new_join.save()
+        
+        return JsonResponse({"status": "success"}, status=200)
+    else:
+        return JsonResponse({"status": "error"}, status=401)
