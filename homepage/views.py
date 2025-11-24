@@ -4,6 +4,9 @@ from homepage.models import NobarSpot
 from django.http import HttpResponseRedirect, JsonResponse
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
+from django.http import HttpResponse
+from django.core import serializers
+from join.models import Join_List # Import Join_List
 
 # Create your views here.
 def show_homepage(request):
@@ -18,8 +21,10 @@ def show_homepage(request):
 def create_spot(request):
     form = NobarSpotForm(request.POST or None)
 
-    if form.is_valid and request.method == "POST":
-        form.save()
+    if form.is_valid() and request.method == "POST":
+        spot_entry=form.save(commit=False)
+        spot_entry.host = request.user
+        spot_entry.save()
         return redirect('homepage:show_homepage')
     
     context = {'form':form}
@@ -55,20 +60,22 @@ def delete_spot(request,id):
 
 def show_json(request):
     spot_list = NobarSpot.objects.all()
+    json_data = serializers.serialize("json", spot_list)
+    return HttpResponse(json_data, content_type="application/json")
+
+@login_required(login_url='/account/login')
+def get_user_nobar_spots(request):
+    user_nobar_spots = NobarSpot.objects.filter(host=request.user)
     data = [
         {
             'id': str(spot.id),
             'name': spot.name,
-            'thumbnail': spot.thumbnail,
-            'home_team':spot.home_team,
-            'away_team':spot.away_team,
-            'date':spot.date,
-            'time':spot.time,
-            'city':spot.city,
-            'address':spot.address,
-            'host':spot.host,
+            'city': spot.city,
+            'time': spot.time.strftime('%H:%M') if spot.time else None,
+            'host_id': str(spot.host.id),
+            'host_username': spot.host.username,
+            'joined_count': spot.join_list_set.count(), # Add joined count
         }
-        for spot in spot_list
+        for spot in user_nobar_spots
     ]
-
     return JsonResponse(data, safe=False)

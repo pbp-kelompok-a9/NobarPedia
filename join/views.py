@@ -1,55 +1,64 @@
-from join.models import Join_List, NobarSpot
+from django.contrib.auth.decorators import login_required
+from join.models import Join_List
+from homepage.models import NobarSpot
 from django.shortcuts import render, redirect, get_object_or_404
 import datetime
 from django.urls import reverse
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from join.forms import JoinForm
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.html import strip_tags
+import json
+from django.http import JsonResponse
 
-# done
 def show_join(request):
     return render(request, "join.html")
 
-# done just attach user and nobar_place into the request
-def post_join(request):
+@login_required(login_url='/account/login')
+def post_join(request, nobar_place_id):
     form = JoinForm(request.POST or None)
 
     if form.is_valid() and request.method == 'POST':
-        join_entry = form.save(commit = False)
+        nobar_place = get_object_or_404(NobarSpot, pk=nobar_place_id)
+        existing_join = Join_List.objects.filter(user=request.user, nobar_place=nobar_place).first()
 
-        if request.user.is_authenticated:
-            join_entry.user = request.user
+        # already joined?
+        if existing_join:
+            new_status = form.cleaned_data.get('status')
+
+            # different status?
+            if existing_join.status != new_status:
+                existing_join.status = new_status
+                existing_join.save(update_fields=['status'])
+            return redirect('join:show_join')
         else:
-            join_entry.user = None
-
-        nobar_place_id = request.POST.get('nobar_place')
-        if nobar_place_id:
-            try:
-                nobar_place = NobarSpot.objects.get(id=nobar_place_id)
-                join_entry.nobar_place = nobar_place
-            except NobarSpot.DoesNotExist:
-                join_entry.nobar_place = None
-
-        join_entry.save()
-        return redirect('join:show_join')
+            join_entry = form.save(commit=False)
+            join_entry.user = request.user
+            join_entry.nobar_place = nobar_place
+            join_entry.save()
+            return redirect('join:show_join')
 
     context = {'form': form}
     return render(request, "post_join.html", context)
 
 def get_join(request):
-    join_list = Join_List.objects.all()
-    data = [
-        {
-            'id': str(join_record.id),
-            'user_id': join_record.user_id,
-            'nobar_place_id': join_record.nobar_place_id,
-            'nobar_place_name': join_record.nobar_place.name,
-            'nobar_place_city': join_record.nobar_place.city,
-            'nobar_place_time': join_record.nobar_place.time.strftime('%H:%M'),
-            'status': join_record.status,
-            'created_at': join_record.created_at.isoformat() if join_record.created_at else None,
-        }
-        for join_record in join_list
-    ]
+    if (request.user.is_authenticated):
+        join_list = Join_List.objects.filter(user=request.user)
+        data = [
+            {
+                'id': str(join_record.id),
+                'user': join_record.user.username if join_record.user else None,
+                'user_id': str(join_record.user.id) if join_record.user else None,
+                'nobar_place_id': join_record.nobar_place_id,
+                'nobar_place_name': join_record.nobar_place.name if join_record.nobar_place else None,
+                'nobar_place_city': join_record.nobar_place.city if join_record.nobar_place else None,
+                'nobar_place_time': join_record.nobar_place.time.strftime('%H:%M') if join_record.nobar_place and join_record.nobar_place.time
+        else None,
+                'status': join_record.status,
+                'created_at': join_record.created_at.isoformat() if join_record.created_at else None,
+            }
+            for join_record in join_list
+        ]
 
     return JsonResponse(data, safe=False)
 
@@ -73,3 +82,22 @@ def delete_join(request, id):
     join_record = get_object_or_404(Join_List, pk=id)
     join_record.delete()
     return HttpResponseRedirect(reverse('join:show_join'))
+
+@csrf_exempt
+def create_join_flutter(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        user = request.user
+        status = data.get('status')
+        nobar_place_id = data.get('nobar_place_id')
+        
+        new_join = Join_List(
+            status = status,
+            user = user,
+            nobar_place_id = nobar_place_id
+        )
+        new_join.save()
+        
+        return JsonResponse({"status": "success"}, status=200)
+    else:
+        return JsonResponse({"status": "error"}, status=401)

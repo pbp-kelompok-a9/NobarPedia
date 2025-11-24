@@ -10,7 +10,3 @@ class JoinForm(ModelForm):
         widgets = {
             'status': forms.Select(attrs={'class': 'bg-black text-white p-2 rounded w-full'})
         }
-
-    # def clean_title(self):
-    #     title = self.cleaned_data["title"]
-    #     return strip_tags(title)

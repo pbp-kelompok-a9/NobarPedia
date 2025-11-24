@@ -1,0 +1,15 @@
+<div class="bg-stone-800 rounded-lg p-2">
+    <div class="flex justify-between w-full">
+        <h3 class="text-lg font-medium text-white mb-2"> {{ player.name }} </h3>
+        {% if player.is_defunct %}
+            <p class="text-sm font-small text-red">Defunct</p>
+        {% endif %}
+    </div>
+    <div class="grid grid-cols-5 w-full items-center">
+        {% if player.logo %}
+            <img width="400"
+                 height="400"
+                 src="{{ match.players.0.logo }}">
+        {% endif %}
+    </div>
+</div>

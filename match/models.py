@@ -9,11 +9,9 @@ def player_logo_image_path(instance, filename):
 class Player(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=255)
-    logo_height = models.PositiveIntegerField(default=400)
-    logo_width = models.PositiveIntegerField(default=400)
-    logo = models.ImageField(upload_to=player_logo_image_path, width_field='logo_width', height_field='logo_height', null=True, blank=True)
+    logo = models.URLField(null=True, blank=True)
     established_date = models.DateField()
-    is_defunct = models.BooleanField(default=False)
+    is_defunct = models.BooleanField(default=False, blank=True)
 
 
 def competition_logo_image_path(instance, filename):
@@ -23,9 +21,7 @@ def competition_logo_image_path(instance, filename):
 class Competition(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=255)
-    logo_height = models.PositiveIntegerField(default=400)
-    logo_width = models.PositiveIntegerField(default=400)
-    logo = models.ImageField(upload_to=competition_logo_image_path, width_field='logo_width', height_field='logo_height', null=True, blank=True)
+    logo = models.URLField(null=True, blank=True)
     begin_date = models.DateField()
     end_date = models.DateField()
 
