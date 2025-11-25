@@ -87,17 +87,58 @@ def delete_join(request, id):
 def create_join_flutter(request):
     if request.method == 'POST':
         data = json.loads(request.body)
-        user = request.user
-        status = data.get('status')
         nobar_place_id = data.get('nobar_place_id')
-        
-        new_join = Join_List(
-            status = status,
-            user = user,
-            nobar_place_id = nobar_place_id
-        )
-        new_join.save()
+        new_status = data.get('status')
+        user = request.user
+        nobar_place = get_object_or_404(NobarSpot, pk=nobar_place_id)
+        existing_join = Join_List.objects.filter(user=request.user, nobar_place=nobar_place).first()
+
+        # already joined?
+        if existing_join:
+            # different status?
+            if existing_join.status != new_status:
+                existing_join.status = new_status
+                existing_join.save(update_fields=['status'])
+        else:
+            new_join = Join_List(
+                status = new_status,
+                user = user,
+                nobar_place_id = nobar_place_id
+            )
+            new_join.save()
         
         return JsonResponse({"status": "success"}, status=200)
     else:
         return JsonResponse({"status": "error"}, status=401)
+
+
+@csrf_exempt
+def update_join_flutter(request, id):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        new_status = data.get('status')
+
+        join_record = get_object_or_404(Join_List, pk=id)
+        join_record.status = new_status
+        join_record.save(update_fields=['status'])
+        
+        return JsonResponse({"status": "success"}, status=200)
+    else:
+        return JsonResponse({"status": "error"}, status=401)
+
+
+@csrf_exempt
+def delete_join_flutter(request, id):
+    if request.method == 'POST':
+        join_record = get_object_or_404(Join_List, pk=id)
+        join_record.delete()
+        return JsonResponse({"status": "success"}, status=200)
+    else:
+        return JsonResponse({"status": "error"}, status=401)
+        
+
+        
+        
+        
+        
+        
