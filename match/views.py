@@ -28,6 +28,7 @@ def match_main(request: HttpRequest):
     })
 
 
+@method_decorator(csrf_exempt, name='dispatch')
 class BasicMatchAPIView(View):
 
     model_class: type[Model] = None
@@ -47,6 +48,7 @@ class BasicMatchAPIView(View):
             case _:
                 return HttpResponseNotAllowed('opt not r for POST request')
 
+    @method_decorator(require_POST)
     @method_decorator(csrf_exempt)
     def post(self, request: HttpRequest, *args, **kwargs):
         """Handles POST requests (e.g., creating data)"""
