@@ -1,0 +1,152 @@
+<div id="crudModal" class="hidden fixed inset-0 z-50 w-full flex items-center justify-center bg-gray-800 bg-opacity-50">
+  <div class="max-w-3xl opacity-0 mx-auto px-4 sm:px-6 lg:px-8 py-8" id="createModal">
+    <div class="bg-[#333333] rounded-lg border border-gray-500 p-6 sm:p-8 form-style">
+      <div class="mb-8">
+        <h1 class="text-2xl tracking-wide text-white mb-2 text-center">Add New Match</h1>
+      </div>
+      <form id="comp_form" class="space-y-6">
+        <input type="hidden" name="csrfmiddlewaretoken" value="FyemG3RJW5kS3zlz8vsbqwgafUQYdr5KOYIjmkpXG6kTvQwQIGoSWAKHwoFOTeY1">
+        <div>
+          <label for="id_competition" class="block text-sm font-medium text-white mb-2">
+            Competition
+          </label>
+          <div class="w-full">
+            <select name="competition" required id="id_competition" onchange="getPlayersForCompetition()" 
+                    class="w-full bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-green-500 focus:border-green-500 block p-2.5 placeholder-gray-400">
+               <option value="" selected>Select a competition...</option>
+               </select>
+          </div>
+        </div>
+        <div>
+          <label for="id_players" class="block text-sm font-medium text-white mb-2">
+            Players
+          </label>
+          <div class="w-full">
+            <select name="players" required id="id_players" multiple 
+                    class="w-full bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-green-500 focus:border-green-500 block p-2.5 placeholder-gray-400 h-32">
+              </select>
+          </div>
+        </div>
+        <div>
+          <label for="id_begin_datetime" class="block text-sm font-medium text-white mb-2">
+            Begin datetime
+          </label>
+          <div class="w-full">
+            <input type="date" name="begin_datetime" id="id_begin_datetime" 
+                   class="w-full bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-green-500 focus:border-green-500 block p-2.5 placeholder-gray-400">
+          </div>
+        </div>
+        <div>
+          <label for="id_end_datetime" class="block text-sm font-medium text-white mb-2">
+            End datetime
+          </label>
+          <div class="w-full">
+            <input type="date" name="end_datetime" id="id_end_datetime" 
+                   class="w-full bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-green-500 focus:border-green-500 block p-2.5 placeholder-gray-400">
+          </div>
+        </div>
+        <div class="flex flex-col sm:flex-row gap-4 pt-6 border-t border-gray-500">
+          <button onclick="hideCreateModal()" class="order-2 sm:order-1 px-6 py-3 border border-gray-500 text-gray-300 rounded-md font-medium hover:bg-gray-700 hover:text-white transition-colors text-center">
+            Cancel
+          </button>
+          <button type="button" onclick="addMatchEntry()" class="order-1 sm:order-2 flex-1 bg-green-600 text-white px-6 py-3 rounded-md font-medium hover:bg-green-700 transition-colors shadow-lg shadow-green-900/50">
+            Create Match
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<script>
+const competition_options = document.querySelector('#id_competition');
+const player_options = document.querySelector('#id_players');
+const modalParent = document.getElementById("crudModal");
+const createModal = document.getElementById("createModal");
+
+function showCreateModal() {
+  modalParent.classList.remove("hidden");
+  setTimeout(() => {
+    createModal.classList.remove('opacity-0', 'scale-95');
+    createModal.classList.add('opacity-100', 'scale-100');
+  }, 50); 
+}
+
+function hideCreateModal() {
+  modalParent.classList.add("hidden");
+  createModal.classList.remove('opacity-100', 'scale-100');
+  createModal.classList.add('opacity-0', 'scale-95');
+}
+
+
+function setCompetitionSelections(data) {
+    competition_options.innerHTML = "";
+    for (const item of data) {
+        const id = item.pk;
+        const name = DOMPurify.sanitize(item.fields.name);
+        const option = document.createElement('option');
+        option.setAttribute("value", id);
+        option.innerHTML = name;
+        competition_options.appendChild(option);
+    }
+}
+
+function setPlayerSelections(data) {
+    const currentSelection = Array.from(player_options.selectedOptions).map(option => option.value);
+    player_options.innerHTML = "";
+    for (const item of data) {
+        const id = item.pk;
+        const name = DOMPurify.sanitize(item.fields.name);
+        const option = document.createElement('option');
+        option.setAttribute("value", id);
+        option.innerHTML = name;
+        if (currentSelection.includes(option.value)) {
+            option.selected = true;
+        }
+        player_options.appendChild(option);
+    }
+}
+
+async function getCompetitionOptions() {
+    try {
+        const response = await fetch("{% url 'match:api_read_all_competition' %}", {
+            headers: { 'Accept': 'application/json' },
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch data from server');
+        }
+        const matchData = await response.json();
+        setCompetitionSelections(JSON.parse(matchData || []));
+    } catch (error) {
+        console.error('Error loading', error);
+    }
+}
+
+async function getPlayerOptions() {
+    try {
+        const response = await fetch("{% url 'match:api_read_all_player' %}", {
+            headers: { 'Accept': 'application/json' },
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch data from server');
+        }
+        const matchData = await response.json();
+        setPlayerSelections(JSON.parse(matchData || []));
+    } catch (error) {
+        console.error('Error loading', error);
+    }
+}
+
+async function addMatchEntry() {
+    await fetch("{% url 'match:api_create_match' %}", {
+      method: "POST",
+      body: new FormData(document.querySelector('#comp_form')),
+    })
+    document.getElementById("comp_form").reset();
+    hideCreateModal();
+}
+
+document.addEventListener('DOMContentLoaded', getPlayerOptions)
+document.addEventListener('DOMContentLoaded', getCompetitionOptions)
+</script>
