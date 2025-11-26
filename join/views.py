@@ -6,6 +6,10 @@ import datetime
 from django.urls import reverse
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from join.forms import JoinForm
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.html import strip_tags
+import json
+from django.http import JsonResponse
 
 def show_join(request):
     return render(request, "join.html")
@@ -38,22 +42,23 @@ def post_join(request, nobar_place_id):
     return render(request, "post_join.html", context)
 
 def get_join(request):
-    join_list = Join_List.objects.filter(user=request.user)
-    data = [
-        {
-            'id': str(join_record.id),
-            'user': join_record.user.username if join_record.user else None,
-            'user_id': str(join_record.user.id) if join_record.user else None,
-            'nobar_place_id': join_record.nobar_place_id,
-            'nobar_place_name': join_record.nobar_place.name if join_record.nobar_place else None,
-            'nobar_place_city': join_record.nobar_place.city if join_record.nobar_place else None,
-            'nobar_place_time': join_record.nobar_place.time.strftime('%H:%M') if join_record.nobar_place and join_record.nobar_place.time
-    else None,
-            'status': join_record.status,
-            'created_at': join_record.created_at.isoformat() if join_record.created_at else None,
-        }
-        for join_record in join_list
-    ]
+    if (request.user.is_authenticated):
+        join_list = Join_List.objects.filter(user=request.user)
+        data = [
+            {
+                'id': str(join_record.id),
+                'user': join_record.user.username if join_record.user else None,
+                'user_id': str(join_record.user.id) if join_record.user else None,
+                'nobar_place_id': join_record.nobar_place_id,
+                'nobar_place_name': join_record.nobar_place.name if join_record.nobar_place else None,
+                'nobar_place_city': join_record.nobar_place.city if join_record.nobar_place else None,
+                'nobar_place_time': join_record.nobar_place.time.strftime('%H:%M') if join_record.nobar_place and join_record.nobar_place.time
+        else None,
+                'status': join_record.status,
+                'created_at': join_record.created_at.isoformat() if join_record.created_at else None,
+            }
+            for join_record in join_list
+        ]
 
     return JsonResponse(data, safe=False)
 
@@ -77,3 +82,63 @@ def delete_join(request, id):
     join_record = get_object_or_404(Join_List, pk=id)
     join_record.delete()
     return HttpResponseRedirect(reverse('join:show_join'))
+
+@csrf_exempt
+def create_join_flutter(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        nobar_place_id = data.get('nobar_place_id')
+        new_status = data.get('status')
+        user = request.user
+        nobar_place = get_object_or_404(NobarSpot, pk=nobar_place_id)
+        existing_join = Join_List.objects.filter(user=request.user, nobar_place=nobar_place).first()
+
+        # already joined?
+        if existing_join:
+            # different status?
+            if existing_join.status != new_status:
+                existing_join.status = new_status
+                existing_join.save(update_fields=['status'])
+        else:
+            new_join = Join_List(
+                status = new_status,
+                user = user,
+                nobar_place_id = nobar_place_id
+            )
+            new_join.save()
+        
+        return JsonResponse({"status": "success"}, status=200)
+    else:
+        return JsonResponse({"status": "error"}, status=401)
+
+
+@csrf_exempt
+def update_join_flutter(request, id):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        new_status = data.get('status')
+
+        join_record = get_object_or_404(Join_List, pk=id)
+        join_record.status = new_status
+        join_record.save(update_fields=['status'])
+        
+        return JsonResponse({"status": "success"}, status=200)
+    else:
+        return JsonResponse({"status": "error"}, status=401)
+
+
+@csrf_exempt
+def delete_join_flutter(request, id):
+    if request.method == 'POST':
+        join_record = get_object_or_404(Join_List, pk=id)
+        join_record.delete()
+        return JsonResponse({"status": "success"}, status=200)
+    else:
+        return JsonResponse({"status": "error"}, status=401)
+        
+
+        
+        
+        
+        
+        

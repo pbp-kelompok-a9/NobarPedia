@@ -34,13 +34,13 @@ Modul ini berfungsi untuk mengatur sistem autentikasi pengguna dalam aplikasi. D
 
 *Dikerjakan oleh Inaeah*
 
-Modul ini mengelola operasi **CRUD** untuk entitas *acara nobar*. Acara nobar merupakan event yang berlangsung di suatu tempat nobar dengan waktu yang mengacu pada jadwal pertandingan (*match*). **Guest**, **User**, maupun **Admin** dapat melihat daftar acara nobar serta melakukan pencarian berdasarkan filter lokasi dan waktu. Pengguna bertipe **User** dapat menambahkan tempat nobar baru, membuat acara nobar, serta mengedit detail tempat dan acara yang dimilikinya.  
+Modul ini mengelola operasi **CRUD** untuk entitas *acara nobar*. Acara nobar merupakan event yang berlangsung di suatu tempat nobar. **Guest**, **User**, maupun **Admin** dapat melihat daftar acara nobar. Pengguna bertipe **User** dapat menambahkan tempat nobar baru, membuat acara nobar, serta mengedit detail tempat dan acara yang dimilikinya.  
 
 + 🗓️ **Match**
 
 *Dikerjakan oleh Evan*
 
-Modul ini berfungsi untuk mengatur data pertandingan atau *match* yang menjadi acuan waktu bagi setiap acara nobar. Hanya **Admin** yang memiliki hak penuh untuk melakukan operasi **CRUD** pada data *match*, termasuk menambah, mengedit, melihat, dan menghapus jadwal pertandingan. **User** dan **Guest** hanya memiliki akses untuk melihat daftar jadwal pertandingan yang tersedia.  
+Modul ini berfungsi untuk mengatur data pertandingan atau *match*. Hanya **Admin** yang memiliki hak penuh untuk melakukan operasi **CRUD** pada data *match*, termasuk menambah, mengedit, melihat, dan menghapus jadwal pertandingan. **User** dan **Guest** hanya memiliki akses untuk melihat daftar jadwal pertandingan yang tersedia.  
 
 + 🙋‍♂️ **Join**
 
@@ -62,7 +62,7 @@ Modul ini menyediakan fitur **CRUD** untuk ulasan (*review*) terhadap tempat nob
 
 * **User** → Pengguna yang dapat membuat dan mengelola tempat dan acara nobar, memberikan review, serta bergabung dalam acara nobar.  
 
-* **Admin** → Pengguna yang memiliki hak penuh untuk melakukan manipulasi data tempat nobar, acara nobar, match, review, maupun daftar peserta (*join*) jika ditemukan pelanggaran.  
++ **Admin** → Pengguna yang memiliki hak untuk melakukan manipulasi match.
 
 ---
 
