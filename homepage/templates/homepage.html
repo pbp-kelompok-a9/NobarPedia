@@ -147,6 +147,68 @@
 
 </section>
 
+<!-- List of matches -->
+<section id="list-match" class="relative flex flex-col items-center text-white bg-[#1E1E1E] py-20 w-full">
+  <!-- Judul -->
+  <h2 class="text-2xl md:text-3xl mb-8 tracking-wide text-center">
+    View current matches, competitions, and even players!
+  </h2>
+
+
+{% if user.is_authenticated %}
+  <!-- Tombol Desktop -->
+  <div class="relative w-full max-w-3xl hidden md:flex justify-center mt-8 items-center">
+    
+    {% if perms.auth.view_user %}
+        <button id="matchbtn" onclick="showCreateModal()"
+          class="absolute -left-48 bg-green-600 hover:bg-green-700 text-white font-medium px-5 py-2 rounded-md transition">
+          + Add New Match
+        </button>
+    {% endif %}
+
+    <!-- Tombol tengah -->
+    <div class="flex gap-4">
+      <button id="filter-match"class="bg-green-600 hover:bg-green-700 text-white font-medium px-5 py-2 rounded-md transition" onclick="fetchMatchFromServer()">
+        Matches
+      </button>
+      <button id="filter-competitions"class="border border-green-600 text-white font-medium px-5 py-2 rounded-md hover:bg-green-600 transition" onclick="fetchCompetitionFromServer()">
+        Competitions
+      </button>
+      <button id="filter-players"class="border border-green-600 text-white font-medium px-5 py-2 rounded-md hover:bg-green-600 transition" onclick="fetchPlayerFromServer()">
+        Players
+      </button>
+    </div>
+  </div>
+  {% endif %}
+
+    <!-- Loading Spinner -->
+  <div id="matchLoading" class="bg-[#1E1E1E] text-center py-12 hidden">
+    <svg class="animate-spin h-8 w-8 text-green-600 inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+    </svg>
+    <p class="text-gray-400 mt-3">Loading spots...</p>
+  </div>
+
+  <!-- Error State -->
+  <div id="matchError" class="hidden text-red-500 text-center py-12">Failed to load spots. Please try again later.</div>
+
+  <!-- Empty State -->
+  <div id="matchEmpty" class="hidden text-center py-16">
+    <h3 class="text-xl mb-2">No spots found</h3>
+    <p class="text-gray-400 mb-6">Be the first to create a new spot!</p>
+    
+  </div>
+
+  <!-- Grid Container -->
+  <div id="matchGrid" class="hidden grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-12 w-[90%] md:w-[80%]"></div>
+
+
+  {% include "create_modal.html" %}
+</section>
+
+
+
 <script>
 const SPOT_API = "{% url 'homepage:show_json' %}";
 const CURRENT_USER_ID = "{{ user.id|default_if_none:'' }}";
@@ -161,6 +223,63 @@ const yourBtns = document.querySelectorAll('#filter-my');
 
 let allSpots = [];
 let activeFilter = 'all';
+
+const matchLoading = document.getElementById('matchLoading');
+const matchError = document.getElementById('matchError');
+const matchEmpty = document.getElementById('matchEmpty');
+const matchGrid = document.getElementById('matchGrid');
+let activeMatchFilter = 'match'; // match or competition or player
+let allMatch = [];
+let isAdmin;
+{% if perms.auth.view_user %}
+    isAdmin = true;
+{% else %}
+    isAdmin = false;
+{% endif %}
+
+function formatDateTime(dateTimeString) {
+    // Check if it's a date-only string (e.g., "2025-10-22")
+    const isDateOnly = !dateTimeString.includes('T');
+
+    let date;
+    let options;
+
+    if (isDateOnly) {
+        // --- Handle Date-Only String ---
+
+        // 1. To avoid timezone issues, we treat the date-only
+        // string as UTC midnight by appending 'T00:00:00Z'.
+        date = new Date(dateTimeString + 'T00:00:00Z');
+
+        // 2. Define options for formatting the date only
+        options = {
+            year: 'numeric',  // e.g., 2025
+            month: 'long',    // e.g., October
+            day: 'numeric',     // e.g., 22
+            timeZone: 'UTC'   // Interpret the date as UTC
+        };
+
+    } else {
+        // --- Handle Full DateTime String ---
+
+        // 1. Create a Date object from the full ISO string
+        date = new Date(dateTimeString);
+
+        // 2. Define options for formatting the date and time
+        options = {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: 'numeric',
+            minute: 'numeric',
+            hour12: true,
+            timeZone: 'UTC' // The 'Z' in the original string means UTC
+        };
+    }
+
+    // 3. Format the date using the determined options
+    return new Intl.DateTimeFormat('en-US', options).format(date);
+}
 
 function updateFilterButtonsAppearance() {
   allBtns.forEach(btn => {
@@ -183,12 +302,147 @@ function showSection({ loading: showLoading=false, error: showError=false, empty
   grid.classList.toggle('hidden', !showGrid);
 }
 
+function addMatchItem() {
+    if (activeMatchFilter === "match") {
+
+        fetchMatchFromServer();
+    } else if (activeMatchFilter === "player") {
+
+        fetchPlayerFromServer();
+    } else { // competition
+
+        fetchCompetitionFromServer();
+    }
+    fet
+}
+
+function renderMatches() {
+    matchGrid.innerHTML = '';
+  allMatch.forEach(s => matchGrid.appendChild(buildMatchCard(s)));
+}
+
+function buildMatchCard(item) {
+    const div = document.createElement('div');
+    div.className = "bg-stone-800 rounded-lg p-2";
+    if (activeMatchFilter === "match") {
+        const name = DOMPurify.sanitize(item.competition[0].fields.name);
+        const begin_datetime = DOMPurify.sanitize(formatDateTime(item.fields.begin_datetime));
+        const end_datetime = DOMPurify.sanitize(formatDateTime(item.fields.end_datetime));
+        const first_logo = DOMPurify.sanitize(item.players[0][0].fields.logo);
+        const second_logo = DOMPurify.sanitize(item.players[1][0].fields.logo);
+        const first_player_name = DOMPurify.sanitize(item.players[0][0].fields.name);
+        const second_player_name = DOMPurify.sanitize(item.players[1][0].fields.name);
+
+        let first_logo_html = "";
+        let second_logo_html = "";
+
+        if (first_logo.length > 0) {
+            first_logo_html = `
+                <img width="400"
+                     height="400"
+                     src="${first_logo}">
+            `
+        }
+
+        if (second_logo.length > 0) {
+            second_logo_html = `
+                <img width="400"
+                     height="400"
+                     src="${second_logo}">
+            `
+        }
+
+        const matchCard = `
+            <div class="flex flex-col justify-center w-full">
+                <h3 class="text-lg font-medium text-center text-white mb-2"> ${name} </h3>
+                <p class="text-sm font-small text-center text-white">${begin_datetime} - ${end_datetime}</p>
+            </div>
+            <div class="grid grid-cols-5 w-full items-center">
+                <div class="col-span-2 w-full justify-center text-center text-white">
+                    <a href="" class="text-white transition-all hover:text-green-600">
+                        ${first_logo_html}
+                        ${first_player_name}
+                    </a>
+                </div>
+                <h3 class="select-none text-center text-white text-3xl font-medium">vs</h3>
+                <div class="col-span-2 w-full justify-center text-center text-white">
+                    <a href="" class="text-white transition-all hover:text-green-600">
+                        ${second_logo_html}
+                        ${second_player_name}
+                    </a>
+                </div>
+            </div>
+        `
+        div.innerHTML = matchCard;
+    } else if (activeMatchFilter === "player") {
+        const name = DOMPurify.sanitize(item.fields.name);
+        const logo = DOMPurify.sanitize(item.fields.logo);
+        const established_date = formatDateTime(item.fields.established_date);
+
+        let logo_html = "";
+        let defunct_html = ""
+
+        if (logo.length > 0) {
+            logo_html = `
+                <img width="400"
+                     height="400"
+                     src="${logo}">
+            `
+        }
+
+        if (item.fields.is_defunct) {
+            defunct_html = '<p class="text-sm font-small text-red">Defunct</p>';
+        }
+
+        const matchCard = `
+            <h3 class="text-lg font-medium text-center text-white mb-2"> ${name} </h3>
+            <p class="text-sm font-small text-center text-white">${established_date}</p>
+            ${defunct_html}
+            <div class="grid w-full items-center">
+                ${logo_html}    
+            </div>
+        `
+        div.innerHTML = matchCard;
+
+    } else { // competition
+
+        const name = DOMPurify.sanitize(item.fields.name);
+        const begin_date = DOMPurify.sanitize(formatDateTime(item.fields.begin_date));
+        const end_date = DOMPurify.sanitize(formatDateTime(item.fields.end_date));
+        const logo = DOMPurify.sanitize(item.fields.logo);
+
+        let logo_html = "";
+
+        if (logo.length > 0) {
+            logo_html = `
+                <img width="400"
+                     height="400"
+                     src="${logo}">
+            `
+        }
+
+        const matchCard = `
+        <div class="bg-stone-800 rounded-lg p-2">
+            <h3 class="text-lg font-medium text-center text-white mb-2"> ${name} </h3>
+            <p class="text-sm font-small text-center text-white">${begin_date} - ${end_date}</p>
+            <div class="grid grid-cols-5 w-full items-center">
+                ${logo_html}
+            </div>
+        </div>            
+        `
+        div.innerHTML = matchCard;
+
+    }
+    return div;
+}
+
 function safeFormatDate(dateStr) {
   if (!dateStr) return '';
   const d = new Date(dateStr);
   if (isNaN(d.getTime())) return dateStr;
   return d.toLocaleDateString('en-US', { month:'short', day:'2-digit' });
 }
+
 
 function buildSpotCard(spot) {
     const div = document.createElement('div');
@@ -244,6 +498,129 @@ function renderSpots(spots) {
   grid.innerHTML = '';
   spots.forEach(s => grid.appendChild(buildSpotCard(s)));
 }
+
+async function fetchMatchFromServer() {
+    try {
+        matchLoading.classList.remove("hidden");
+        matchGrid.classList.add("hidden");
+        matchEmpty.classList.add('hidden');
+        const response = await fetch("{% url 'match:api_read_all_match' %}", {
+            headers: { 'Accept': 'application/json' },
+        });
+        if (!response.ok) {
+            throw new Error('Failed to fetch data from server');
+        }
+        const matchData = await response.json();
+        allMatch = JSON.parse(matchData || []);
+        console.log(allMatch);
+        for (const item of allMatch) {
+            item.competition = JSON.parse(await fetchCompetitionIdFromServer(item.fields.competition));
+            const p_1 = await fetchPlayerIdFromServer(item.fields.players[0]);
+            const p_2 = await fetchPlayerIdFromServer(item.fields.players[1]);
+            item.players = [JSON.parse(p_1), JSON.parse(p_2)];
+        }
+        console.log(allMatch);
+        activeMatchFilter = "match";
+        renderMatches();
+        matchLoading.classList.add("hidden");
+        matchGrid.classList.remove("hidden");
+        if (allMatch.length == 0) {
+            matchEmpty.classList.remove('hidden');
+        }
+    } catch (error) {
+        console.error('Error loading', error);
+    }
+}
+
+async function fetchCompetitionIdFromServer(id) {
+    try {
+       
+
+        const link = `{% url 'match:api_read_competition' '00000000-0000-0000-0000-000000000000' %}`.replace('00000000-0000-0000-0000-000000000000', id);
+        const response = await fetch(link, {
+            headers: { 'Accept': 'application/json' },
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch data from server');
+        }
+        const data = await response.json();
+        return data || [];
+    } catch (error) {
+        console.error('Error loading', error);
+    }
+}
+
+ async function fetchPlayerIdFromServer(id) {
+    try {
+        const link = `{% url 'match:api_read_player' '00000000-0000-0000-0000-000000000000' %}`.replace('00000000-0000-0000-0000-000000000000', id);
+        const response = await fetch(link, {
+            headers: { 'Accept': 'application/json' },
+        });
+        if (!response.ok) {
+            throw new Error('Failed to fetch data from server');
+        }
+        const data = await response.json();
+        return data || [];
+    } catch (error) {
+        console.error('Error loading', error);
+    }
+}
+
+async function fetchCompetitionFromServer() {
+    try {
+        matchLoading.classList.remove("hidden");
+        matchGrid.classList.add("hidden");
+        matchEmpty.classList.add('hidden');
+        const response = await fetch("{% url 'match:api_read_all_competition' %}", {
+            headers: { 'Accept': 'application/json' },
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch data from server');
+        }
+        const matchData = await response.json();
+        allMatch = JSON.parse(matchData || []);
+        activeMatchFilter = "competition";
+        renderMatches();
+        matchLoading.classList.add("hidden");
+        matchGrid.classList.remove("hidden");
+        if (allMatch.length == 0) {
+            matchEmpty.classList.remove('hidden');
+        }
+    } catch (error) {
+        console.error('Error loading', error);
+    }
+}
+
+async function fetchPlayerFromServer() {
+    try {
+        matchLoading.classList.remove("hidden");
+        matchGrid.classList.add("hidden");
+        matchEmpty.classList.add('hidden');
+
+        const response = await fetch("{% url 'match:api_read_all_player' %}", {
+            headers: { 'Accept': 'application/json' },
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch data from server');
+        }
+        const matchData = await response.json();
+        allMatch = JSON.parse(matchData || []);
+        activeMatchFilter = "player";
+        renderMatches();
+        matchLoading.classList.add("hidden");
+        matchGrid.classList.remove("hidden");
+        if (allMatch.length == 0) {
+            matchEmpty.classList.remove('hidden');
+        }
+
+    } catch (error) {
+        console.error('Error loading', error);
+    }
+}
+
 
 function filterSpots() {
   updateFilterButtonsAppearance();
@@ -310,6 +687,7 @@ yourBtns.forEach(btn => {
 });
 
 document.addEventListener('DOMContentLoaded', fetchSpots);
+document.addEventListener('DOMContentLoaded', fetchMatchFromServer);
 </script>
 
 
