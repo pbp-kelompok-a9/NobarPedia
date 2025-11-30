@@ -356,3 +356,22 @@ def change_password_flutter(request, id):
         "status": False,
         "message": "Use POST method please"
     }, status=405)
+    
+    
+@csrf_exempt
+def delete_profile_flutter(request, id):
+    # Hanya dirinya sendiri atau ADMIN yg boleh delete
+    if request.user.id != id:
+        return JsonResponse({
+            "status": False,
+            "message": "yore not allowed to change other people's passwords."
+        }, status=403)
+
+    user_to_delete = get_object_or_404(User, pk=id)
+
+    user_to_delete.delete()
+
+    return JsonResponse({
+        "status": True,
+        "message": "Account has been successfully deleted."
+    }, status=403)

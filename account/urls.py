@@ -22,5 +22,6 @@ urlpatterns = [
     path('api/current_user_id/', views.current_user_id, name='current_user_id'),
     path('api/view_profile/<int:id>/', views.view_profile_flutter, name='view_profile_flutter'),
     path('api/edit_profile/<int:id>/', views.edit_profile_flutter, name='edit_profile_flutter'),
-    path('api/change_password/<int:id>/', views.change_password_flutter, name='change_profile_flutter')
+    path('api/change_password/<int:id>/', views.change_password_flutter, name='change_profile_flutter'),
+    path('api/delete_profile/<int:id>/', views.delete_profile_flutter, name='delete_profile_flutter'),
 ]
