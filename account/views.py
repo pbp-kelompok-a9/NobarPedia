@@ -260,3 +260,67 @@ def logout_flutter(request):
             "status": False,
             "message": "Logout failed."
         }, status=401)
+
+@login_required
+def current_user_id(request):
+    return JsonResponse({
+        "id": request.user.id,
+        "username": request.user.username,
+    })
+        
+def view_profile_flutter(request, id):
+    user = get_object_or_404(User, pk=id)
+    profile = getattr(user, "profile", None)
+    
+    show_update_button = False
+    if (request.user.id == id):
+        show_update_button = True
+    # print(getattr(profile, "profile_picture", "").url)
+    try:
+        profile_picture_url = getattr(profile, "profile_picture", "")
+        if profile_picture_url:
+            # print(profile_picture_url.url)
+            profile_picture_url = profile_picture_url.url # type: ignore
+        
+        return JsonResponse({
+            "username": user.username,
+            "email": user.email,
+            "fullname": getattr(profile, "fullname", ""),
+            "bio": getattr(profile, "bio", ""),
+            "profile_picture_url": profile_picture_url,
+            "show_update_button": show_update_button
+        }, status=200)
+    except:
+        return JsonResponse({
+            "status": False,
+            "message": "Error on fetching profile"
+        }, status=401)
+
+@csrf_exempt
+def edit_profile_flutter(request, id):
+    if request.user.id != id:
+        return JsonResponse({
+            "status": False,
+            "message": "your not allowed to edit other profiles dawg"
+        }, status=403)
+        
+    user = get_object_or_404(User, pk=id)
+    
+    if request.method == 'POST':
+        form = CustomUserEditForm(request.POST, instance=user)
+        if form.is_valid():
+            form.save()
+            return JsonResponse({
+                "status": True,
+                "message": "User profile updated successfully!"
+            }, status=200)
+        else:
+            return JsonResponse({
+                "status": False,
+                "message": form.errors
+            }, status=400)
+    else:
+        return JsonResponse({
+            "status": False,
+            "message": "use POST method please"
+        }, status=405)
