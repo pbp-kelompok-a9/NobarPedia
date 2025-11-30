@@ -324,3 +324,35 @@ def edit_profile_flutter(request, id):
             "status": False,
             "message": "use POST method please"
         }, status=405)
+        
+ 
+@csrf_exempt
+def change_password_flutter(request, id):
+    if request.user.id != id:
+        return JsonResponse({
+            "status": False,
+            "message": "yore not allowed to change other people's passwords."
+        }, status=403)
+
+    user = get_object_or_404(User, pk=id)
+
+    if request.method == 'POST':
+        form = PasswordChangeForm(user, request.POST)
+
+        if form.is_valid():
+            user = form.save()
+            update_session_auth_hash(request, user)
+            
+            return JsonResponse({
+                "status": True,
+                "message": "Password changed successfully!"
+            }, status=200)
+        else:
+            return JsonResponse({
+                "status": False,
+                "message": form.errors
+            }, status=400)
+    return JsonResponse({
+        "status": False,
+        "message": "Use POST method please"
+    }, status=405)
