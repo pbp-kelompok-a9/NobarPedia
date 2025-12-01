@@ -187,9 +187,13 @@ def login_flutter(request):
         if user.is_active:
             login(request, user)
             # Login status successful.
+            
+            is_admin = request.user.has_perm('auth.delete_user')  
+            
             return JsonResponse({
                 "username": user.username,
                 "status": True,
+                "is_admin": is_admin,
                 "message": "Login successful!"
                 # Add other data if you want to send data to Flutter.
             }, status=200)
@@ -279,6 +283,8 @@ def view_profile_flutter(request, id):
         show_update_button = True
     # print(getattr(profile, "profile_picture", "").url)
     try:
+        is_admin = request.user.has_perm('auth.delete_user')  
+      
         profile_picture_url = getattr(profile, "profile_picture", "")
         if profile_picture_url:
             # print(profile_picture_url.url)
@@ -290,7 +296,8 @@ def view_profile_flutter(request, id):
             "fullname": getattr(profile, "fullname", ""),
             "bio": getattr(profile, "bio", ""),
             "profile_picture_url": profile_picture_url,
-            "show_update_button": show_update_button
+            "show_update_button": show_update_button,
+            "is_admin": is_admin,
         }, status=200)
     except:
         return JsonResponse({
