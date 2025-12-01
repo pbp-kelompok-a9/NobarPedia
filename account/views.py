@@ -291,6 +291,7 @@ def view_profile_flutter(request, id):
             profile_picture_url = profile_picture_url.url # type: ignore
         
         return JsonResponse({
+            "id": user.pk,
             "username": user.username,
             "email": user.email,
             "fullname": getattr(profile, "fullname", ""),
@@ -402,15 +403,50 @@ def account_admin_flutter(request):
         profile_picture_url = getattr(profile, "profile_picture", "")
         if profile_picture_url:
             profile_picture_url = profile_picture_url.url # type: ignore
-            
+        else:
+            profile_picture_url = ""
+                        
         responseData.append({
             "id": user.pk,
             "username": user.username,
-            "is_admin": user.has_perm("auth.view_user"),
+            "email": user.email,
+            "fullname": getattr(profile, "fullname", ""),
+            "bio": getattr(profile, "bio", ""),
             "profile_picture_url": profile_picture_url,
+            "show_update_button": False,
+            "is_admin": user.has_perm("auth.view_user"),
         })
     
     return JsonResponse({
         "status": True,
         "responseData": responseData
     }, status=200)
+    
+@csrf_exempt
+def admin_edit_profile_flutter(request, id):
+    if not request.user.has_perm('auth.change_user'):
+        return JsonResponse({
+            "status": False,
+            "message": "you have to become admin dawg"
+        }, status=403)
+        
+    user = get_object_or_404(User, pk=id)
+    
+    if request.method == 'POST':
+        form = AdminUserEditForm(request.POST, instance=user)
+        if form.is_valid():
+            form.save()
+            return JsonResponse({
+                "status": True,
+                "message": "User profile updated successfully!"
+            }, status=200)
+        else:
+            return JsonResponse({
+                "status": False,
+                "message": form.errors
+            }, status=400)
+    else:
+        return JsonResponse({
+            "status": False,
+            "message": "use POST method please"
+        }, status=405)
