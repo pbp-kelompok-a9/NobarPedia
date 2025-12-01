@@ -370,12 +370,12 @@ def change_password_flutter(request, id):
 @csrf_exempt
 def delete_profile_flutter(request, id):
     # Hanya dirinya sendiri atau ADMIN yg boleh delete
-    if request.user.id != id:
+    if (request.user.id != id) and (not request.user.has_perm('auth.view_user')) :
         return JsonResponse({
             "status": False,
             "message": "yore not allowed to change other people's passwords."
         }, status=403)
-
+        
     user_to_delete = get_object_or_404(User, pk=id)
 
     user_to_delete.delete()
@@ -383,7 +383,7 @@ def delete_profile_flutter(request, id):
     return JsonResponse({
         "status": True,
         "message": "Account has been successfully deleted."
-    }, status=403)
+    }, status=200)
 
 
 @login_required(login_url='/account/login')
@@ -395,11 +395,20 @@ def account_admin_flutter(request):
         }, status=403)
         
     users = User.objects.all()
-    responseData = [{
-        "id": user.pk,
-        "username": user.username,
-        "is_admin": user.has_perm("auth.view_user")
-    } for user in users]
+    responseData = []
+    
+    for user in users:
+        profile = getattr(user, "profile", None)
+        profile_picture_url = getattr(profile, "profile_picture", "")
+        if profile_picture_url:
+            profile_picture_url = profile_picture_url.url # type: ignore
+            
+        responseData.append({
+            "id": user.pk,
+            "username": user.username,
+            "is_admin": user.has_perm("auth.view_user"),
+            "profile_picture_url": profile_picture_url,
+        })
     
     return JsonResponse({
         "status": True,
