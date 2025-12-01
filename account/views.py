@@ -384,3 +384,24 @@ def delete_profile_flutter(request, id):
         "status": True,
         "message": "Account has been successfully deleted."
     }, status=403)
+
+
+@login_required(login_url='/account/login')
+def account_admin_flutter(request):
+    if not request.user.has_perm('auth.view_user'):
+        return JsonResponse({
+            "status": False,
+            "message": "only admin allowed"
+        }, status=403)
+        
+    users = User.objects.all()
+    responseData = [{
+        "id": user.pk,
+        "username": user.username,
+        "is_admin": user.has_perm("auth.view_user")
+    } for user in users]
+    
+    return JsonResponse({
+        "status": True,
+        "responseData": responseData
+    }, status=200)
