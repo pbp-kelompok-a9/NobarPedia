@@ -65,7 +65,6 @@ INSTALLED_APPS = [
     'match',
     'join',
     'corsheaders',
-    'authentication',
 ]
 
 MIDDLEWARE = [

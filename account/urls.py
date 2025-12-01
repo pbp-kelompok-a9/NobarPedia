@@ -15,4 +15,15 @@ urlpatterns = [
     path('delete_profile/<int:id>', views.delete_profile, name='delete_profile'),
     path('admin', views.account_admin_dashboard, name='account_admin_dashboard'),
     path('admin/edit_profile/<int:id>', views.admin_edit_profile, name='admin_edit_profile'),
+    # flutter:
+    path('api/login/', views.login_flutter, name='login_flutter'),
+    path('api/register/', views.register_flutter, name='register_flutter'),
+    path('api/logout/', views.logout_flutter, name='logout_flutter'),
+    path('api/current_user_id/', views.current_user_id, name='current_user_id'),
+    path('api/view_profile/<int:id>/', views.view_profile_flutter, name='view_profile_flutter'),
+    path('api/edit_profile/<int:id>/', views.edit_profile_flutter, name='edit_profile_flutter'),
+    path('api/change_password/<int:id>/', views.change_password_flutter, name='change_profile_flutter'),
+    path('api/delete_profile/<int:id>/', views.delete_profile_flutter, name='delete_profile_flutter'),
+    path('api/admin/', views.account_admin_flutter, name='account_admin_flutter'),
+    path('api/admin/edit_profile/<int:id>/', views.admin_edit_profile_flutter, name='admin_edit_profil_flutter'),
 ]
