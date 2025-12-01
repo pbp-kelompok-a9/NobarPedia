@@ -263,9 +263,11 @@ def logout_flutter(request):
 
 @login_required
 def current_user_id(request):
+    is_admin = request.user.has_perm('auth.delete_user')  
     return JsonResponse({
         "id": request.user.id,
         "username": request.user.username,
+        "is_admin": is_admin,
     })
         
 def view_profile_flutter(request, id):
