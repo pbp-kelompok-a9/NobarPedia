@@ -4,19 +4,22 @@
 <div class = "bg-black w-full pt-16 min-h-screen">
     <div class = "max-w-7x1 mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <!--Nobar Spot Display Section-->
-        <div>
-            <div class="block text-white text-align:center">
-                <img src="{{ nobar_spot.thumbnail }}" width="600" height="300" style="float:left"/>
-                <div class="block text-blue text-center font-size=70px space-y-4">
-                    <h1 style="">{{nobar_spot.name}}</h1>
-                    <p class="text-green-500">{{nobar_spot.home_team}} vs {{nobar_spot.away_team}}</p>
-                    <p>{{nobar_spot.address}}</p>
-                    <p>{{nobar_spot.city}}</p>
-                    <a href="{% url 'join:post_join' nobar_spot.id %}" class="px-32 rounded bg-green-500 py-2 mt-8">  Join </a>    
+        <div class="flex flex-col sm:flex-row gap-12 w-full mx-20">
+            <div class="w-1/2  py-6"><img src="{{ nobar_spot.thumbnail }}" class="object-cover aspect-video" fill/></div>
+            <div class="space-y-8 text-white w-1/2">
+                <h1 class="text-5xl">{{nobar_spot.name}}</h1>
+                <div class="inline-block space-y-8 text-center">
+                    <p class="px-6 border border-[#2CAC5C] rounded-xl text-green-500">{{nobar_spot.home_team}} vs {{nobar_spot.away_team}}</p>
+                    <div class="flex gap-4">
+                        <p class="text-sm border-2 border-solid [border-image:linear-gradient(to_bottom,#1e1e1e,#0B6044)_1] p-1 px-2">⭐ 5.0</p>
+                        <p class="text-sm border-2 border-solid [border-image:linear-gradient(to_bottom,#1e1e1e,#0B6044)_1] p-1 px-2">{{nobar_spot.date}} | {{nobar_spot.time}}</p>
+                    </div>
                 </div>
                 
+                <p>{{nobar_spot.address}}</p>
+                <p>{{nobar_spot.city}}</p>
+                <div class="pt-8"><a href="{% url 'join:post_join' nobar_spot.id %}" class="px-40 rounded bg-green-500 py-2">  Join </a>    </div>
             </div>
-            
         </div>
         <!--Review Flexbox-->
         {% if not review_list%}
