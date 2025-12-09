@@ -77,6 +77,7 @@ def json_spots(request):
             'city': spot.city,
             'address': spot.address,
             'host': spot.host.id,
+            'host_username': spot.host.username,
         }
         for spot in spot_list
     ]
@@ -130,14 +131,14 @@ def create_spot_flutter(request):
         time = data.get("time", "")
         city = strip_tags(data.get("city",""))
         address = strip_tags(data.get("address",""))
-        host = request.host
+        host = request.user
         
         new_spot = NobarSpot(
             name=name, 
             thumbnail = thumbnail,
             home_team=home_team,
             away_team=away_team,
-            data = date,
+            date = date,
             time=time,
             city=city,
             address=address,
@@ -148,3 +149,25 @@ def create_spot_flutter(request):
         return JsonResponse({"status": "success"}, status=200)
     else:
         return JsonResponse({"status": "error"}, status=401)
+
+@csrf_exempt
+def delete_spot_flutter(request, id):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            username = data.get("username")
+            
+            if not username:
+                return JsonResponse({"status": "error", "message": "Username required"}, status=401)
+            try:
+                spot = NobarSpot.objects.get(pk=id)
+            except NobarSpot.DoesNotExist:
+                return JsonResponse({"status": "error", "message": "Spot not found"}, status=404)
+
+            spot.delete()
+
+            return JsonResponse({"status": "success", "message": "Spot deleted successfully"}, status=200)            
+        except Exception as e:
+            return JsonResponse({"status": "error", "message": str(e)}, status=400)
+    else:
+        return JsonResponse({"status": "error"}, status=405)
