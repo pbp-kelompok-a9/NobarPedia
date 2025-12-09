@@ -1,7 +1,6 @@
 from django.urls import path
-from homepage.views import show_homepage, create_spot,show_spot
-from homepage.views import delete_spot, show_json, edit_spot, get_user_nobar_spots
-
+from homepage.views import show_homepage, create_spot,show_spot, proxy_image, json_spots
+from homepage.views import delete_spot, edit_spot, get_user_nobar_spots, create_spot_flutter
 app_name = 'homepage'
 
 urlpatterns = [
@@ -9,7 +8,9 @@ urlpatterns = [
     path('create-spot/',create_spot, name='create_spot'),
     path('spot/<str:id>/',show_spot,name='show_spot'),
     path('spot/<uuid:id>/delete', delete_spot,name='delete_spot'),
-    path('json/', show_json, name='show_json'),
+    path('json/', json_spots, name='json_spots'),
     path('spot/<uuid:id>/edit', edit_spot, name='edit_spot'),
     path('user-spots-json/', get_user_nobar_spots, name='get_user_nobar_spots'),
+    path('proxy-image/', proxy_image, name='proxy_image'),
+    path('create-spot-flutter/',create_spot_flutter,name='create-spot-flutter')
 ]

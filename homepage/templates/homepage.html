@@ -210,7 +210,7 @@
 
 
 <script>
-const SPOT_API = "{% url 'homepage:show_json' %}";
+const SPOT_API = "{% url 'homepage:json_spots' %}";
 const CURRENT_USER_ID = "{{ user.id|default_if_none:'' }}";
 
 const loading = document.getElementById('loading');
@@ -230,12 +230,7 @@ const matchEmpty = document.getElementById('matchEmpty');
 const matchGrid = document.getElementById('matchGrid');
 let activeMatchFilter = 'match'; // match or competition or player
 let allMatch = [];
-let isAdmin;
-{% if perms.auth.view_user %}
-    isAdmin = true;
-{% else %}
-    isAdmin = false;
-{% endif %}
+let isAdmin = "{{ perms.auth.view_user }}" === "True";
 
 function formatDateTime(dateTimeString) {
     // Check if it's a date-only string (e.g., "2025-10-22")
