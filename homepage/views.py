@@ -171,3 +171,51 @@ def delete_spot_flutter(request, id):
             return JsonResponse({"status": "error", "message": str(e)}, status=400)
     else:
         return JsonResponse({"status": "error"}, status=405)
+    
+@csrf_exempt
+def edit_spot_flutter(request, id):
+    if request.method == 'POST':
+        try:
+            # Cari spot berdasarkan ID
+            spot = NobarSpot.objects.get(pk=id)
+            
+            data = json.loads(request.body)
+            username = data.get('username')
+            
+            if spot.host.username != username:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'You are not authorized to edit this spot'
+                }, status=403)
+            
+            spot.name = data.get('name', spot.name)
+            spot.home_team = data.get('home_team', spot.home_team)
+            spot.away_team = data.get('away_team', spot.away_team)
+            spot.thumbnail = data.get('thumbnail', spot.thumbnail)
+            spot.date = data.get('date', spot.date)
+            spot.time = data.get('time', spot.time)
+            spot.city = data.get('city', spot.city)
+            spot.address = data.get('address', spot.address)
+            
+            spot.save()
+            
+            return JsonResponse({
+                'status': 'success',
+                'message': 'Spot updated successfully'
+            }, status=200)
+            
+        except NobarSpot.DoesNotExist:
+            return JsonResponse({
+                'status': 'error',
+                'message': 'Spot not found'
+            }, status=404)
+        except Exception as e:
+            return JsonResponse({
+                'status': 'error',
+                'message': str(e)
+            }, status=500)
+    
+    return JsonResponse({
+        'status': 'error',
+        'message': 'Invalid request method'
+    }, status=405)
