@@ -83,6 +83,26 @@ def json_spots(request):
     ]
     return JsonResponse(data, safe=False)
 
+def json_my_spot(request):
+    spot_list = NobarSpot.objects.filter(host=request.user)
+    data = [
+        {
+            'id': str(spot.id),
+            'name': spot.name,
+            'thumbnail': spot.thumbnail,
+            'home_team':spot.home_team,
+            'away_team' : spot.away_team,
+            'date': spot.date,
+            'time': spot.time,
+            'city': spot.city,
+            'address': spot.address,
+            'host': spot.host.id,
+            'host_username': spot.host.username,
+        }
+        for spot in spot_list
+    ]
+    return JsonResponse(data, safe=False)
+
 @login_required(login_url='/account/login')
 def get_user_nobar_spots(request):
     user_nobar_spots = NobarSpot.objects.filter(host=request.user)
