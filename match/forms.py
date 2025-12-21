@@ -16,7 +16,7 @@ class PlayerForm(ModelForm):
 class MatchForm(ModelForm):
     class Meta:
         model = models.Match
-        fields = ["competition", "players", "begin_datetime", "end_datetime"] # shownAt
+        fields = ["competition", "players", "begin_datetime", "end_datetime", "shownAt"] # shownAt
 
     def clean(self):
         super().clean()

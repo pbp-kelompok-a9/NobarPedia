@@ -1,4 +1,5 @@
 from django.db import models
+from homepage.models import NobarSpot
 import uuid
 
 
@@ -30,6 +31,6 @@ class Match(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     competition = models.ForeignKey(to=Competition, on_delete=models.CASCADE)
     players = models.ManyToManyField(to=Player)
-    # shownAt = models.ManyToManyField(to=)
+    shownAt = models.ManyToManyField(to=NobarSpot)
     begin_datetime = models.DateTimeField()
     end_datetime = models.DateTimeField()

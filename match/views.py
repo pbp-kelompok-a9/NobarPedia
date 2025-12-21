@@ -1,4 +1,5 @@
 from django.shortcuts import render
+import json
 from django.contrib.auth.decorators import login_required, permission_required
 from django.views.decorators.http import require_POST
 from django.http import HttpRequest, HttpResponse, HttpResponseNotAllowed, JsonResponse
@@ -11,6 +12,12 @@ from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from django.shortcuts import get_object_or_404
 from . import models
+
+
+def get_match_spots(request: HttpRequest, match_id):
+    obj = models.Match.objects.get(pk=match_id).shownAt.all()
+    data = serializers.serialize("json", obj)
+    return JsonResponse(data, safe=False)
 
 
 def match_main(request: HttpRequest):
@@ -69,6 +76,12 @@ class BasicMatchAPIView(View):
         obj = [obj]
         data = serializers.serialize("json", obj)
         return JsonResponse(data, safe=False)
+    
+    def delete_object(self, request: HttpRequest, id):
+        obj = get_object_or_404(self.model_class, pk=id)
+        obj.delete()
+        return JsonResponse({"status": "success"}, status=202)
+
 
     def read_all(self, request: HttpRequest):
         obj = self.model_class.objects.all()
@@ -77,21 +90,32 @@ class BasicMatchAPIView(View):
         return JsonResponse(data, safe=False)
 
     def create_object(self, request: HttpRequest):
-        form = self.form_class(request.POST, request.FILES or None)
+        if not request.POST and request.body:
+            try:
+                data = json.loads(request.body)
+            except json.JSONDecodeError:
+                data = {}
+        else:
+            data = request.POST
+
+        form = self.form_class(data, request.FILES or None)
         if form.is_valid():
             form.save()
-            return HttpResponse(status=201)
-        return HttpResponse(form.errors.as_json(), status=400)
-
-    def delete_object(self, request: HttpRequest, id):
-        obj = get_object_or_404(self.model_class, pk=id)
-        obj.delete()
-        return HttpResponse(status=202)
+            return JsonResponse({"status": "success"}, status=201)
+        return JsonResponse(form.errors, status=400)
 
     def update_object(self, request: HttpRequest, id):
         obj = get_object_or_404(self.model_class, pk=id)
-        form = self.form_class(request.POST, request.FILES or None, instance=obj)
+        if not request.POST and request.body:
+            try:
+                data = json.loads(request.body)
+            except json.JSONDecodeError:
+                data = {}
+        else:
+            data = request.POST
+
+        form = self.form_class(data, request.FILES or None, instance=obj)
         if form.is_valid():
             form.save()
-            return HttpResponse(status=201)
-        return HttpResponse(status=400)
+            return JsonResponse({"status": "success"}, status=201)
+        return JsonResponse(form.errors, status=400)

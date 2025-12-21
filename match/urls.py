@@ -6,6 +6,8 @@ from .forms import CompetitionForm, MatchForm, PlayerForm
 app_name = 'match'
 
 urlpatterns = [
+    path('api/match/get_spots/<str:match_id>/', views.get_match_spots, name="get_match_spots"),
+
     path('home/', views.match_main, name="match_main"),
 
     path('api/match/post/create_competition/', views.BasicMatchAPIView.as_view(
