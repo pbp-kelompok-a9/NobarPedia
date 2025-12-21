@@ -284,12 +284,23 @@ def view_profile_flutter(request, id):
     # print(getattr(profile, "profile_picture", "").url)
     try:
         is_admin = request.user.has_perm('auth.delete_user')  
-      
+        # print("1")
         profile_picture_url = getattr(profile, "profile_picture", "")
         if profile_picture_url:
             # print(profile_picture_url.url)
             profile_picture_url = profile_picture_url.url # type: ignore
+        else:
+            profile_picture_url = "static/image/no-profile-picture.svg"
         
+        # print("2")
+        # print(user.pk)
+        # print(user.username)
+        # print(user.email)
+        # print(getattr(profile, "fullname", ""))
+        # print(getattr(profile, "bio", ""))
+        # print(profile_picture_url)
+        # print(show_update_button)
+        # print(is_admin)
         return JsonResponse({
             "id": user.pk,
             "username": user.username,
@@ -300,10 +311,10 @@ def view_profile_flutter(request, id):
             "show_update_button": show_update_button,
             "is_admin": is_admin,
         }, status=200)
-    except:
+    except Exception as e:
         return JsonResponse({
             "status": False,
-            "message": "Error on fetching profile"
+            "message": f"Error on fetching : {str(e)}"
         }, status=401)
 
 @csrf_exempt
